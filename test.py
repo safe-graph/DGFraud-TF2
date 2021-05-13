@@ -8,11 +8,11 @@ import os
 import sys
 import numpy as np
 import argparse
+from sklearn.model_selection import train_test_split
 
 import tensorflow as tf
 
 from algorithms.FdGars.FdGars_main import FdGars_main
-from utils.data_loader import load_data_dblp
 from utils.utils import preprocess_adj, preprocess_feature, sample_mask
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
@@ -23,8 +23,6 @@ parser.add_argument('--seed', type=int, default=123, help='random seed')
 parser.add_argument('--epochs', type=int, default=1,
                     help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=512, help='batch size')
-parser.add_argument('--train_size', type=float, default=0.2,
-                    help='training set percentage')
 parser.add_argument('--dropout', type=float, default=0.5, help='dropout rate')
 parser.add_argument('--weight_decay', type=float, default=0.001,
                     help='weight decay')
@@ -39,10 +37,74 @@ args = parser.parse_args()
 np.random.seed(args.seed)
 tf.random.set_seed(args.seed)
 
+
+def load_example_data(meta=False):
+    """
+    Loading the a small handcrafted data for testing
+    """
+
+    features = np.array([[1, 1, 0, 0, 0, 0, 0],
+                         [0, 0, 1, 0, 1, 1, 0],
+                         [0, 1, 0, 1, 0, 0, 0],
+                         [0, 0, 0, 0, 0, 1, 0],
+                         [0, 0, 0, 0, 1, 0, 1],
+                         [1, 0, 1, 1, 0, 0, 0],
+                         [0, 1, 0, 0, 1, 0, 0],
+                         [0, 1, 0, 0, 0, 1, 1]
+                         ], dtype=np.float)
+    if meta:
+        # a heterogeneous information network
+        # with two meta-paths
+        rownetworks = [np.array([[1, 0, 0, 1, 0, 1, 1, 1],
+                                 [1, 0, 0, 1, 1, 1, 0, 1],
+                                 [1, 0, 0, 0, 0, 0, 0, 1],
+                                 [0, 1, 0, 0, 1, 1, 1, 0],
+                                 [0, 1, 1, 1, 0, 1, 0, 0],
+                                 [1, 0, 0, 1, 1, 1, 0, 1],
+                                 [1, 0, 0, 0, 0, 0, 0, 1],
+                                 [0, 1, 0, 0, 1, 1, 1, 0]], dtype=np.float),
+                       np.array([[1, 0, 0, 0, 0, 1, 1, 1],
+                                 [0, 1, 0, 0, 1, 1, 0, 0],
+                                 [0, 1, 1, 1, 0, 0, 0, 0],
+                                 [0, 0, 1, 1, 1, 0, 0, 1],
+                                 [1, 1, 0, 1, 1, 0, 0, 0],
+                                 [1, 0, 0, 1, 0, 1, 1, 1],
+                                 [1, 0, 0, 1, 1, 1, 0, 1],
+                                 [1, 0, 0, 0, 0, 0, 0, 1]], dtype=np.float)]
+    else:
+        # a homogeneous graph
+        rownetworks = [np.array([[1, 0, 0, 1, 0, 1, 1, 1],
+                                 [1, 0, 0, 1, 1, 1, 0, 1],
+                                 [1, 0, 0, 0, 0, 0, 0, 1],
+                                 [0, 1, 0, 0, 1, 1, 1, 0],
+                                 [0, 1, 1, 1, 0, 1, 0, 0],
+                                 [1, 0, 0, 1, 1, 1, 0, 1],
+                                 [1, 0, 0, 0, 0, 0, 0, 1],
+                                 [0, 1, 0, 0, 1, 1, 1, 0]], dtype=np.float)]
+
+    y = np.array([[0, 1], [1, 0], [1, 0], [1, 0],
+                  [1, 0], [1, 0], [1, 0], [0, 1]], dtype=np.float)
+
+    index = range(len(y))
+
+    X_train, X_test, y_train, y_test = train_test_split(index, y,
+                                                        test_size=0.375,
+                                                        random_state=48,
+                                                        shuffle=True)
+    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train,
+                                                      test_size=0.2,
+                                                      random_state=48,
+                                                      shuffle=True)
+
+    split_ids = [X_train, y_train, X_val, y_val, X_test, y_test]
+
+    return rownetworks, features, split_ids, np.array(y)
+
+
 # testing FdGars
 # load the data
 adj_list, features, [idx_train, _, idx_val, _, idx_test, _], y = \
-    load_data_dblp(meta=False, train_size=args.train_size)
+    load_example_data(meta=False)
 
 # convert to dense tensors
 train_mask = tf.convert_to_tensor(sample_mask(idx_train, y.shape[0]))
