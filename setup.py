@@ -13,13 +13,16 @@ with open(path.join(this_directory, 'requirements.txt'),
 
 setup(name='DGFraud-TF2',
       version="0.0.1",
-      author="Yingtong Dou, Zhongzheng Lu, Zhiqin Yang, Kay Liu, Yutong Deng, Hengrui Zhang, Zhiwei Liu and UIC BDSC Lab",
+      author="Yingtong Dou, Zhongzheng Lu, Zhiqin Yang, Kay Liu, Yutong Deng, "
+             "Hengrui Zhang, Zhiwei Liu and UIC BDSC Lab",
       author_email="bdscsafegraph@gmail.com",
-      description='A Deep Graph-based Toolbox for Fraud Detection in Tensorflow 2.X',
+      description='A Deep Graph-based Toolbox for Fraud Detection '
+                  'in Tensorflow 2.X',
       long_description=open("README.md", "r", encoding="utf-8").read(),
       long_description_content_type="text/markdown",
       url='https://github.com/safe-graph/DGFraud-TF2',
-      download_url='https://github.com/safe-graph/DGFraud-TF2/archive/master.zip',
+      download_url='https://github.com/safe-graph/DGFraud-TF2/archive/'
+                   'master.zip',
       keywords=['fraud detection', 'anomaly detection', 'graph neural network',
                 'data mining', 'security'],
       install_requires=['numpy>=1.16.4',

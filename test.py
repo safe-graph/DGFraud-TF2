@@ -6,30 +6,32 @@ https://github.com/safe-graph/DGFraud-TF2
 
 import os
 import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
+import numpy as np
+import argparse
 
 import tensorflow as tf
-from tensorflow.keras import optimizers
 
-import argparse
-from tqdm import tqdm
+from algorithms.FdGars.FdGars_main import FdGars_main
+from utils.data_loader import load_data_dblp
+from utils.utils import preprocess_adj, preprocess_feature, sample_mask
 
-import algorithms.FdGars.FdGars.main as FdGars_main
-
-from utils.data_loader import *
-from utils.utils import *
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 # init the common args, expect the model specific args
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=123, help='random seed')
-parser.add_argument('--epochs', type=int, default=1, help='number of epochs to train')
+parser.add_argument('--epochs', type=int, default=1,
+                    help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=512, help='batch size')
-parser.add_argument('--train_size', type=float, default=0.2, help='training set percentage')
+parser.add_argument('--train_size', type=float, default=0.2,
+                    help='training set percentage')
 parser.add_argument('--dropout', type=float, default=0.5, help='dropout rate')
-parser.add_argument('--weight_decay', type=float, default=0.001, help='weight decay')
-parser.add_argument('--lr', type=float, default=0.001, help='learning rate')
-parser.add_argument('--nhid', type=int, default=128, help='number of hidden units in GCN')
+parser.add_argument('--weight_decay', type=float, default=0.001,
+                    help='weight decay')
+parser.add_argument('--lr', type=float, default=0.001,
+                    help='learning rate')
+parser.add_argument('--nhid', type=int, default=128,
+                    help='number of hidden units in GCN')
 
 args = parser.parse_args()
 
@@ -39,7 +41,8 @@ tf.random.set_seed(args.seed)
 
 # testing FdGars
 # load the data
-adj_list, features, idx_train, _, idx_val, _, idx_test, _, y = load_data_dblp(meta=False, train_size=args.train_size)
+adj_list, features, [idx_train, _, idx_val, _, idx_test, _], y = \
+    load_data_dblp(meta=False, train_size=args.train_size)
 
 # convert to dense tensors
 train_mask = tf.convert_to_tensor(sample_mask(idx_train, y.shape[0]))

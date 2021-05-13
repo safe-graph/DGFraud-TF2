@@ -7,7 +7,7 @@
 <p>
 <p align="center">
     <a href="https://travis-ci.org/github/safe-graph/DGFraud-TF2">
-        <img alt="PRs Welcome" src="https://travis-ci.org/safe-graph/DGFraud-TF2.svg?branch=main">
+        <img alt="PRs Welcome" src="https://travis-ci.com/safe-graph/DGFraud-TF2.svg?token=wicswr4X2g4v8jddTpUv&branch=main">
     </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/blob/main/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/safe-graph/DGFraud-TF2">
