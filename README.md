@@ -1,21 +1,21 @@
 <p align="center">
     <br>
     <a href="https://image.flaticon.com/icons/svg/1671/1671517.svg">
-        <img src="https://github.com/safe-graph/DGFraud-TF2/blob/master/logo.png" width="550"/>
+        <img src="https://github.com/safe-graph/DGFraud-TF2/blob/main/logo.png" width="550"/>
     </a>
     <br>
 <p>
 <p align="center">
     <a href="https://travis-ci.org/github/safe-graph/DGFraud-TF2">
-        <img alt="PRs Welcome" src="https://travis-ci.org/safe-graph/DGFraud-TF2.svg?branch=master">
+        <img alt="PRs Welcome" src="https://travis-ci.org/safe-graph/DGFraud-TF2.svg?branch=main">
     </a>
-    <a href="https://github.com/safe-graph/DGFraud-TF2/blob/master/LICENSE">
+    <a href="https://github.com/safe-graph/DGFraud-TF2/blob/main/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/safe-graph/DGFraud-TF2">
     </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/pulls">
         <img alt="GitHub release" src="https://img.shields.io/github/v/release/safe-graph/DGFraud-TF2?include_prereleases">
     </a>
-    <a href="https://github.com/safe-graph/DGFraud-TF2/archive/master.zip">
+    <a href="https://github.com/safe-graph/DGFraud-TF2/archive/main.zip">
         <img alt="PRs" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg">
     </a>
 </p>
