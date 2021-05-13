@@ -63,7 +63,7 @@ python setup.py install
 ```
 ### Requirements
 ```bash
-* python 3.6, 3.7
+* python>=3.6
 * tensorflow>=2.0
 * numpy>=1.16.4
 * scipy>=1.2.0

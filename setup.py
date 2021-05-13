@@ -12,7 +12,7 @@ with open(path.join(this_directory, 'requirements.txt'),
     requirements = f.read().splitlines()
 
 setup(name='DGFraud-TF2',
-      version="0.1.0",
+      version="0.0.1",
       author="Yingtong Dou, Zhongzheng Lu, Zhiqin Yang, Kay Liu, Yutong Deng, Hengrui Zhang, Zhiwei Liu and UIC BDSC Lab",
       author_email="bdscsafegraph@gmail.com",
       description='A Deep Graph-based Toolbox for Fraud Detection in Tensorflow 2.X',
