@@ -9,6 +9,9 @@
     <a href="https://travis-ci.org/github/safe-graph/DGFraud-TF2">
         <img alt="PRs Welcome" src="https://travis-ci.com/safe-graph/DGFraud-TF2.svg?token=wicswr4X2g4v8jddTpUv&branch=main">
     </a>
+    <a href="https://www.tensorflow.org/install">
+        <img alt="GitHub" src="https://img.shields.io/badge/tensorflow-2.X-yellow">
+    </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/blob/main/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/safe-graph/DGFraud-TF2">
     </a>
@@ -30,7 +33,7 @@
 
 **DGFraud-TF2** is a Graph Neural Network (GNN) based toolbox for fraud detection. It is the Tensorflow 2.X version of [DGFraud](https://github.com/safe-graph/DGFraud), which is implemented using TF 1.X. It integrates the implementation & comparison of state-of-the-art GNN-based fraud detection models. The introduction of implemented models can be found [here](#implemented-models).
 
-We welcome contributions on adding new fraud detectors and extending the features of the toolbox.
+We welcome contributions to this repo like adding new fraud detectors and extending the features of the toolbox.
 
 If you use the toolbox in your project, please cite the paper below and the [algorithms](#implemented-models) you used:
 
