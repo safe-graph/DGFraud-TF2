@@ -9,6 +9,7 @@ import sys
 import numpy as np
 import argparse
 from sklearn.model_selection import train_test_split
+from typing import Tuple
 
 import tensorflow as tf
 
@@ -38,9 +39,13 @@ np.random.seed(args.seed)
 tf.random.set_seed(args.seed)
 
 
-def load_example_data(meta=False):
+def load_example_data(meta: bool = False) -> \
+        Tuple[list, np.array, list, np.array]:
     """
     Loading the a small handcrafted data for testing
+
+    :param meta: if True: it loads a HIN with two meta-graphs,
+                 if False: it loads a homogeneous graph
     """
 
     features = np.array([[1, 1, 0, 0, 0, 0, 0],
@@ -104,7 +109,7 @@ def load_example_data(meta=False):
 # testing FdGars
 # load the data
 adj_list, features, [idx_train, _, idx_val, _, idx_test, _], y = \
-    load_example_data(meta=False)
+    load_example_data(meta=True)
 
 # convert to dense tensors
 train_mask = tf.convert_to_tensor(sample_mask(idx_train, y.shape[0]))

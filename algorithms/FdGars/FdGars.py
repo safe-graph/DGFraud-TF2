@@ -10,7 +10,8 @@ Link: https://dl.acm.org/citation.cfm?id=3316586
 
 import os
 import sys
-
+import argparse
+from typing import Tuple
 import tensorflow as tf
 from tensorflow import keras
 
@@ -23,14 +24,15 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 class FdGars(keras.Model):
     """
     The FdGars model
+
     :param input_dim: the input feature dimension
     :param nhid: the output embedding dimension of the first GCN layer
     :param output_dim: the output embedding dimension of the last GCN layer
     (number of classes)
     :param args: additional parameters
     """
-
-    def __init__(self, input_dim, nhid, output_dim, args):
+    def __init__(self, input_dim: int, nhid: int, output_dim: int,
+                 args: argparse.ArgumentParser().parse_args()) -> None:
         super().__init__()
 
         self.input_dim = input_dim
@@ -59,8 +61,13 @@ class FdGars(keras.Model):
                 dropout=args.dropout,
                 norm=False))
 
-    def call(self, inputs, training=True):
-
+    def call(self, inputs: list, training: bool = True) -> \
+            Tuple[tf.Tensor, tf.Tensor]:
+        """
+        Forward propagation
+        :param inputs: the information passed to next layers
+        :param training: whether in the training mode
+        """
         support, x, label, mask = inputs
 
         outputs = [x]

@@ -8,8 +8,15 @@ which itself was very inspired by the keras package
 import tensorflow as tf
 
 
-def masked_softmax_cross_entropy(preds, labels, mask):
-    """Softmax cross-entropy loss with masking."""
+def masked_softmax_cross_entropy(preds: tf.Tensor, labels: tf.Tensor,
+                                 mask: tf.Tensor) -> tf.Tensor:
+    """
+    Softmax cross-entropy loss with masking.
+
+    :param preds: the last layer logits of the input data
+    :param labels: the labels of the input data
+    :param mask: the mask for train/val/test data
+    """
     loss = tf.nn.softmax_cross_entropy_with_logits(logits=preds, labels=labels)
     mask = tf.cast(mask, dtype=tf.float32)
     mask /= tf.maximum(tf.reduce_sum(mask), tf.constant([1.]))
@@ -17,8 +24,15 @@ def masked_softmax_cross_entropy(preds, labels, mask):
     return tf.reduce_mean(loss)
 
 
-def masked_accuracy(preds, labels, mask):
-    """Accuracy with masking."""
+def masked_accuracy(preds: tf.Tensor, labels: tf.Tensor,
+                    mask: tf.Tensor) -> tf.Tensor:
+    """
+    Accuracy with masking.
+
+    :param preds: the class prediction probabilities of the input data
+    :param labels: the labels of the input data
+    :param mask: the mask for train/val/test data
+    """
     correct_prediction = tf.equal(tf.argmax(preds, 1), tf.argmax(labels, 1))
     accuracy_all = tf.cast(correct_prediction, tf.float32)
     mask = tf.cast(mask, dtype=tf.float32)

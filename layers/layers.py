@@ -5,12 +5,18 @@ https://github.com/safe-graph/DGFraud-TF2
 """
 
 import tensorflow as tf
+from typing import Callable, Optional, Tuple
 from tensorflow.keras import layers
 
 
-def sparse_dropout(x, rate, noise_shape):
+def sparse_dropout(x: tf.SparseTensor, rate: float,
+                   noise_shape: int) -> tf.SparseTensor:
     """
     Dropout for sparse tensors.
+
+    :param x: the input sparse tensor
+    :param rate: the dropout rate
+    :param noise_shape: the feature dimension
     """
     random_tensor = 1 - rate
     random_tensor += tf.random.uniform(noise_shape)
@@ -19,8 +25,14 @@ def sparse_dropout(x, rate, noise_shape):
     return pre_out * (1. / (1 - rate))
 
 
-def dot(x, y, sparse=False):
-    """Wrapper for tf.matmul (sparse vs dense)."""
+def dot(x: tf.Tensor, y: tf.Tensor, sparse: bool = False) -> tf.Tensor:
+    """
+    Wrapper for tf.matmul (sparse vs dense).
+
+    :param x: first tensor
+    :param y: second tensor
+    :param sparse: whether the first tensor is of type tf.SparseTensor
+    """
     if sparse:
         res = tf.sparse.sparse_dense_matmul(x, y)
     else:
@@ -32,15 +44,26 @@ class GraphConvolution(layers.Layer):
     """
     Graph convolution layer.
     Source:https://github.com/dragen1860/GCN-TF2/blob/master/layers.py
+
+    :param input_dim: the input feature dimension
+    :param output_dim: the output dimension (number of classes)
+    :param num_features_nonzero: the node feature dimension
+    :param dropout: the dropout rate
+    :param is_sparse_inputs: whether the input feature/adj are sparse matrices
+    :param activation: the activation function
+    :param norm: whether adding L2-normalization to parameters
+    :param bias: whether adding bias term to the output
+    :param featureless: whether the input has features
     """
 
-    def __init__(self, input_dim, output_dim, num_features_nonzero,
-                 dropout=0.,
-                 is_sparse_inputs=False,
-                 activation=tf.nn.relu,
-                 norm=False,
-                 bias=False,
-                 featureless=False, **kwargs):
+    def __init__(self, input_dim: int, output_dim: int,
+                 num_features_nonzero: int,
+                 dropout: float = 0.,
+                 is_sparse_inputs: bool = False,
+                 activation: Callable[[tf.Tensor], tf.Tensor] = tf.nn.relu,
+                 norm: bool = False,
+                 bias: bool = False,
+                 featureless: bool = False, **kwargs: Optional) -> None:
         super(GraphConvolution, self).__init__(**kwargs)
 
         self.dropout = dropout
@@ -58,7 +81,14 @@ class GraphConvolution(layers.Layer):
         if self.bias:
             self.bias = self.add_variable('bias', [output_dim])
 
-    def call(self, inputs, training=None):
+    def call(self, inputs: Tuple[tf.Tensor, tf.Tensor],
+             training: bool = True) -> tf.Tensor:
+        """
+        Forward propagation
+
+        :param inputs: the information passed to next layers
+        :param training: whether in the training mode
+        """
         x, support_ = inputs
 
         # dropout
