@@ -1,6 +1,7 @@
 """
-This code is attributed to Yingtong Dou (@YingtongDou) and UIC BDSC Lab
-DGFraud (A Deep Graph-based Toolbox for Fraud Detection  in TensorFlow 2.X)
+This code is attributed to Yingtong Dou (@YingtongDou), Kay Liu (@kayzliu),
+and UIC BDSC Lab
+DGFraud (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
 
@@ -53,6 +54,36 @@ def load_data_dblp(path: str =
     split_ids = [X_train, y_train, X_val, y_val, X_test, y_test]
 
     return rownetworks, features, split_ids, np.array(y)
+
+def load_data_yelp(path: str = 'dataset/YelpChi.mat',
+                   train_size: int = 0.8, meta: bool = True) -> \
+        Tuple[list, np.array, list, np.array]:
+    """
+    The data loader to load the Yelp heterogeneous information network data
+    source: http://odds.cs.stonybrook.edu/yelpchi-dataset
+
+    :param path: the local path of the dataset file
+    :param train_size: the percentage of training data
+    :param meta: if True: it loads a HIN with three meta-graphs,
+                 if False: it loads a homogeneous rur meta-graph
+    """         
+	data = sio.loadmat(path)
+	truelabels, features = data['label'], data['features'].astype(float)
+	truelabels = truelabels.tolist()[0]
+
+	if not meta:
+		rownetworks = [data['net_rur']]
+	else:
+		rownetworks = [data['net_rur'], data['net_rsr'], data['net_rtr']]
+
+	y = truelabels
+	index = np.arange(len(y))
+	X_train, X_test, y_train, y_test = train_test_split(index, y, stratify=y, test_size=1-train_size, random_state=48, shuffle=True)
+	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, stratify=y_train, test_size=0.2, random_state=48, shuffle=True)
+
+    split_ids = [X_train, y_train, X_val, y_val, X_test, y_test]
+
+	return rownetworks, features, split_ids, np.array(y)
 
 
 def load_example_semi():
