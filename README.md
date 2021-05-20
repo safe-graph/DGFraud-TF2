@@ -6,7 +6,7 @@
     <br>
 <p>
 <p align="center">
-    <a href="https://travis-ci.org/github/safe-graph/DGFraud-TF2">
+    <a href="https://travis-ci.com/github/safe-graph/DGFraud-TF2">
         <img alt="PRs Welcome" src="https://travis-ci.com/safe-graph/DGFraud-TF2.svg?token=wicswr4X2g4v8jddTpUv&branch=main">
     </a>
     <a href="https://www.tensorflow.org/install">
