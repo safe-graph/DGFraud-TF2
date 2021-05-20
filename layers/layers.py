@@ -1,6 +1,6 @@
 """
 This code is attributed to Yingtong Dou (@YingtongDou),
-Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
+Zhongzheng Lu(@lzz-hub-dev), Kay Liu (@kayzliu) and UIC BDSC Lab
 DGFraud (A Deep Graph-based Toolbox for Fraud Detection  in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
@@ -266,6 +266,74 @@ class ConcatenationAggregator(layers.Layer):
         output = dot(concate_vecs, self.con_agg_weights, sparse=False)
 
         return self.act(output)
+        
+
+class SageMeanAggregator(layers.Layer):
+	""" GraphSAGE Mean Aggregation Layer
+    Parts of this code file were originally forked from
+    https://github.com/subbyte/graphsage-tf2
+	"""
+
+	def __init__(self, src_dim, dst_dim, activ=True, **kwargs):
+		"""
+		:param int src_dim: input dimension
+		:param int dst_dim: output dimension
+		"""
+		super().__init__(**kwargs)
+		self.activ_fn = tf.nn.relu if activ else tf.identity
+		self.w = self.add_weight(name=kwargs["name"] + "_weight",
+								 shape=(src_dim * 2, dst_dim),
+								 dtype=tf.float32,
+								 initializer=init_fn,
+								 trainable=True
+								 )
+
+	def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat):
+		"""
+		:param tensor dstsrc_features: the embedding from the previous layer
+		:param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
+		:param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
+		:param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+		"""
+		dst_features = tf.gather(dstsrc_features, dstsrc2dst)
+		src_features = tf.gather(dstsrc_features, dstsrc2src)
+		aggregated_features = tf.matmul(dif_mat, src_features)
+		concatenated_features = tf.concat([aggregated_features, dst_features], 1)
+		x = tf.matmul(concatenated_features, self.w)
+		return self.activ_fn(x)
+
+
+class ConsisMeanAggregator(SageMeanAggregator):
+	""" GraphConsis Mean Aggregation Layer Inherited SageMeanAggregator
+    Parts of this code file were originally forked from
+    https://github.com/subbyte/graphsage-tf2
+	"""
+
+	def __init__(self, src_dim, dst_dim, **kwargs):
+		"""
+		:param int src_dim: input dimension
+		:param int dst_dim: output dimension
+		"""
+		super().__init__(src_dim, dst_dim, activ=False, **kwargs)
+
+
+	def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat, relation_vec, attention_vec):
+		"""
+		:param tensor dstsrc_features: the embedding from the previous layer
+		:param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
+		:param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
+		:param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+		:param tensor relation_vec: 1d corresponding relation vector
+		:param tensor attention_vec: 1d layers shared attention weights vector
+		"""
+		# Equation 5,6 in the paper
+		x = super().__call__(dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat)
+		relation_features = tf.tile([relation_vec], [x.shape[0], 1])
+		alpha = tf.matmul(tf.concat([x, relation_features], 1), attention_vec)
+		alpha = tf.tile(alpha, [1, x.shape[-1]])
+		x = tf.multiply(alpha, x)
+
+		return x
 
 
 class AttentionAggregator(layers.Layer):
