@@ -128,15 +128,6 @@ def matrix_to_adjlist(M, pad=True):
     return adjlist
 
 
-def adjlist_to_matrix(adjlist):
-    nodes = len(adjlist)
-    M = np.zeros((nodes, nodes))
-    for i in range(nodes):
-        for j in adjlist[i]:
-            M[i][j] = 1
-    return M
-
-
 def pairs_to_matrix(pairs, nodes):
     M = np.zeros((nodes, nodes))
     for i, j in pairs:

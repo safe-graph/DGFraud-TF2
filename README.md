@@ -36,12 +36,12 @@ Code Update Checklist:
 2. Add the copy right at file top, add the paper source and your name
 3. Import non tf dependencies, then import tf dependencies, then project dependencies   
 4. Add the comment and type hint for each function and class, give reference to external code, make sure the format is correct
-5. All print should use fstring
+5. All prints should use fstring
 6. Two spaces between function/class, one space between code sections inside function/class
 7. Leave one empty line at the file end   
 8. Make sure line length does not exceed 79.
-9. Add the new dependencies to `requirements.txt` and `setup.py`
-10. Add your function test using example data in `test.py`
+9. Add new dependencies to `requirements.txt` and `setup.py`
+10. Add your function test using example data in `test.py` and run `python test.py`
 11. Run `pycodestyle algorithms layers utils test`
 12. Run `flake8 algorithms layers utils test`
 13. If all steps above finish without errors, commit and make pull request to merge the data to the main branch
