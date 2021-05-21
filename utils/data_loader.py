@@ -66,7 +66,7 @@ def load_data_yelp(path: str = 'dataset/YelpChi.mat',
     :param train_size: the percentage of training data
     :param meta: if True: it loads a HIN with three meta-graphs,
                  if False: it loads a homogeneous rur meta-graph
-    """         
+    """
 	data = sio.loadmat(path)
 	truelabels, features = data['label'], data['features'].astype(float)
 	truelabels = truelabels.tolist()[0]
@@ -87,6 +87,10 @@ def load_data_yelp(path: str = 'dataset/YelpChi.mat',
 
 
 def load_example_semi():
+    """
+    The data loader to load the example data for SemiGNN
+
+    """
     # example data for SemiGNN
     features = np.array([[1, 1, 0, 0, 0, 0, 0],
                          [0, 0, 1, 0, 0, 0, 0],
@@ -128,6 +132,10 @@ def load_example_semi():
 
 
 def load_data_gas():
+    """
+    The data loader to load the example data for GAS
+
+    """
     # example data for GAS
     # construct U-E-I network
     user_review_adj = [[0, 1], [2], [3], [5], [4, 6]]
