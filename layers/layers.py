@@ -440,22 +440,18 @@ class AttentionAggregator(layers.Layer):
         ur = tf.nn.embedding_lookup(review_vecs,
                                     tf.cast(adj_list[0], dtype=tf.int32))
         ur = tf.transpose(tf.random.shuffle(tf.transpose(ur)))
-        # ur = tf.slice(ur, [0, 0], [-1, num_samples])
 
         ri = tf.nn.embedding_lookup(item_vecs,
                                     tf.cast(adj_list[1], dtype=tf.int32))
         ri = tf.transpose(tf.random.shuffle(tf.transpose(ri)))
-        # ri = tf.slice(ri, [0, 0], [-1, num_samples])
 
         ir = tf.nn.embedding_lookup(review_vecs,
                                     tf.cast(adj_list[2], dtype=tf.int32))
         ir = tf.transpose(tf.random.shuffle(tf.transpose(ir)))
-        # ir = tf.slice(ir, [0, 0], [-1, num_samples])
 
         ru = tf.nn.embedding_lookup(user_vecs,
                                     tf.cast(adj_list[3], dtype=tf.int32))
         ru = tf.transpose(tf.random.shuffle(tf.transpose(ru)))
-        # ru = tf.slice(ru, [0, 0], [-1, num_samples])
 
         concate_user_vecs = tf.concat([ur, ri], axis=2)
         concate_item_vecs = tf.concat([ir, ru], axis=2)
