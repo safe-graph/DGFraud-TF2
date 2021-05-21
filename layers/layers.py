@@ -138,6 +138,17 @@ class AttentionLayer(layers.Layer):
     def attention(inputs, attention_size, v_type=None, return_weights=False,
                   bias=True, joint_type='weighted_sum',
                   multi_view=True):
+        """
+        Obtain attention value between different meta_path
+
+        :param inputs: the information passed to next layers
+        :param attention_size: the number of meta_path
+        :param v_type：activate function
+        :param return_weights: the output whether return weights
+        :param bias: whether add bias
+        :param joint_type: the way of calculating output
+        :param multi_view: whether it's a multiple view
+        """
         if multi_view:
             inputs = tf.expand_dims(inputs, 0)
         hidden_size = inputs.shape[-1]
@@ -168,6 +179,13 @@ class AttentionLayer(layers.Layer):
             return output, weights
 
     def node_attention(inputs, adj, return_weights=False):
+        """
+        Obtain attention value between nodes
+
+        :param inputs: the information passed to next layers
+        :param adj: a list of the sparse adjacency matrices
+        :param return_weights: the output whether return weights
+        """
         hidden_size = inputs.shape[-1]
         H_v = tf.Variable(tf.random.normal([hidden_size, 1], stddev=0.1))
 
@@ -193,6 +211,16 @@ class AttentionLayer(layers.Layer):
     # view-level attention (equation (4) in SemiGNN)
     def view_attention(inputs, encoding1, encoding2, layer_size, meta,
                        return_weights=False):
+        """
+        Obtain attention value between different view
+
+        :param inputs: the information passed to next layers
+        :param encoding1: the first view attention layer unit number
+        :param encoding2：the second view attention layer unit number
+        :param layer_size: the number of view attention layer
+        :param meta: the number of meta_path
+        :param return_weights: the output whether return weights
+        """
         h = inputs
         encoding = [encoding1, encoding2]
         for j in range(layer_size):
@@ -215,6 +243,14 @@ class AttentionLayer(layers.Layer):
             return output, weights
 
     def scaled_dot_product_attention(q, k, v, mask):
+        """
+        Obtain attention value in one embedding
+
+        :param q: original embedding
+        :param k: original embedding
+        :param v：embedding after aggregate neighbour feature
+        :param mask: whether use mask
+        """
         qk = tf.matmul(q, k, transpose_b=True)
         dk = tf.cast(tf.shape(k)[-1], tf.float32)
         scaled_attention = qk / tf.math.sqrt(dk)
@@ -233,6 +269,10 @@ class ConcatenationAggregator(layers.Layer):
 
     def __init__(self, input_dim, output_dim, dropout=0., act=tf.nn.relu,
                  concat=False, **kwargs):
+        """
+        :param input_dim: the dimension of input
+        :param output_dim: the dimension of output
+        """
         super(ConcatenationAggregator, self).__init__(**kwargs)
 
         self.input_dim = input_dim
@@ -245,6 +285,9 @@ class ConcatenationAggregator(layers.Layer):
                                                dtype=tf.float32)
 
     def __call__(self, inputs):
+        """
+        :param inputs: the information passed to next layers
+        """
         adj_list, features = inputs
 
         review_vecs = tf.nn.dropout(features[0], self.dropout)
@@ -266,74 +309,75 @@ class ConcatenationAggregator(layers.Layer):
         output = dot(concate_vecs, self.con_agg_weights, sparse=False)
 
         return self.act(output)
-        
+
 
 class SageMeanAggregator(layers.Layer):
-	""" GraphSAGE Mean Aggregation Layer
+    """ GraphSAGE Mean Aggregation Layer
     Parts of this code file were originally forked from
     https://github.com/subbyte/graphsage-tf2
-	"""
+    """
 
-	def __init__(self, src_dim, dst_dim, activ=True, **kwargs):
-		"""
-		:param int src_dim: input dimension
-		:param int dst_dim: output dimension
-		"""
-		super().__init__(**kwargs)
-		self.activ_fn = tf.nn.relu if activ else tf.identity
-		self.w = self.add_weight(name=kwargs["name"] + "_weight",
-								 shape=(src_dim * 2, dst_dim),
-								 dtype=tf.float32,
-								 initializer=init_fn,
-								 trainable=True
-								 )
+    def __init__(self, src_dim, dst_dim, activ=True, **kwargs):
+        """
+        :param int src_dim: input dimension
+        :param int dst_dim: output dimension
+        """
+        super().__init__(**kwargs)
+        self.activ_fn = tf.nn.relu if activ else tf.identity
+        self.w = self.add_weight(name=kwargs["name"] + "_weight",
+                                 shape=(src_dim * 2, dst_dim),
+                                 dtype=tf.float32,
+                                 initializer=init_fn,
+                                 trainable=True
+                                 )
 
-	def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat):
-		"""
-		:param tensor dstsrc_features: the embedding from the previous layer
-		:param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
-		:param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
-		:param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
-		"""
-		dst_features = tf.gather(dstsrc_features, dstsrc2dst)
-		src_features = tf.gather(dstsrc_features, dstsrc2src)
-		aggregated_features = tf.matmul(dif_mat, src_features)
-		concatenated_features = tf.concat([aggregated_features, dst_features], 1)
-		x = tf.matmul(concatenated_features, self.w)
-		return self.activ_fn(x)
+    def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat):
+        """
+        :param tensor dstsrc_features: the embedding from the previous layer
+        :param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
+        :param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
+        :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+        """
+        dst_features = tf.gather(dstsrc_features, dstsrc2dst)
+        src_features = tf.gather(dstsrc_features, dstsrc2src)
+        aggregated_features = tf.matmul(dif_mat, src_features)
+        concatenated_features = tf.concat([aggregated_features, dst_features],
+                                          1)
+        x = tf.matmul(concatenated_features, self.w)
+        return self.activ_fn(x)
 
 
 class ConsisMeanAggregator(SageMeanAggregator):
-	""" GraphConsis Mean Aggregation Layer Inherited SageMeanAggregator
+    """ GraphConsis Mean Aggregation Layer Inherited SageMeanAggregator
     Parts of this code file were originally forked from
     https://github.com/subbyte/graphsage-tf2
-	"""
+    """
 
-	def __init__(self, src_dim, dst_dim, **kwargs):
-		"""
-		:param int src_dim: input dimension
-		:param int dst_dim: output dimension
-		"""
-		super().__init__(src_dim, dst_dim, activ=False, **kwargs)
+    def __init__(self, src_dim, dst_dim, **kwargs):
+        """
+        :param int src_dim: input dimension
+        :param int dst_dim: output dimension
+        """
+        super().__init__(src_dim, dst_dim, activ=False, **kwargs)
 
+    def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat,
+                 relation_vec, attention_vec):
+        """
+        :param tensor dstsrc_features: the embedding from the previous layer
+        :param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
+        :param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
+        :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+        :param tensor relation_vec: 1d corresponding relation vector
+        :param tensor attention_vec: 1d layers shared attention weights vector
+        """
+        # Equation 5,6 in the paper
+        x = super().__call__(dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat)
+        relation_features = tf.tile([relation_vec], [x.shape[0], 1])
+        alpha = tf.matmul(tf.concat([x, relation_features], 1), attention_vec)
+        alpha = tf.tile(alpha, [1, x.shape[-1]])
+        x = tf.multiply(alpha, x)
 
-	def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat, relation_vec, attention_vec):
-		"""
-		:param tensor dstsrc_features: the embedding from the previous layer
-		:param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
-		:param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
-		:param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
-		:param tensor relation_vec: 1d corresponding relation vector
-		:param tensor attention_vec: 1d layers shared attention weights vector
-		"""
-		# Equation 5,6 in the paper
-		x = super().__call__(dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat)
-		relation_features = tf.tile([relation_vec], [x.shape[0], 1])
-		alpha = tf.matmul(tf.concat([x, relation_features], 1), attention_vec)
-		alpha = tf.tile(alpha, [1, x.shape[-1]])
-		x = tf.multiply(alpha, x)
-
-		return x
+        return x
 
 
 class AttentionAggregator(layers.Layer):
@@ -344,6 +388,12 @@ class AttentionAggregator(layers.Layer):
     def __init__(self, input_dim1, input_dim2, output_dim, hid_dim,
                  dropout=0., bias=False, act=tf.nn.relu,
                  concat=False, **kwargs):
+        """
+        :param input_dim1: input dimension in user layer
+        :param input_dim2: input dimension in item layer
+        :param output_dim: output dimension
+        :param hid_dim: hidden dimension
+        """
         super(AttentionAggregator, self).__init__(**kwargs)
 
         self.dropout = dropout
@@ -375,6 +425,9 @@ class AttentionAggregator(layers.Layer):
         self.output_dim = output_dim
 
     def call(self, inputs):
+        """
+        :param inputs: the information passed to next layers
+        """
         adj_list, features = inputs
 
         review_vecs = tf.nn.dropout(features[0], self.dropout)
@@ -387,22 +440,18 @@ class AttentionAggregator(layers.Layer):
         ur = tf.nn.embedding_lookup(review_vecs,
                                     tf.cast(adj_list[0], dtype=tf.int32))
         ur = tf.transpose(tf.random.shuffle(tf.transpose(ur)))
-        # ur = tf.slice(ur, [0, 0], [-1, num_samples])
 
         ri = tf.nn.embedding_lookup(item_vecs,
                                     tf.cast(adj_list[1], dtype=tf.int32))
         ri = tf.transpose(tf.random.shuffle(tf.transpose(ri)))
-        # ri = tf.slice(ri, [0, 0], [-1, num_samples])
 
         ir = tf.nn.embedding_lookup(review_vecs,
                                     tf.cast(adj_list[2], dtype=tf.int32))
         ir = tf.transpose(tf.random.shuffle(tf.transpose(ir)))
-        # ir = tf.slice(ir, [0, 0], [-1, num_samples])
 
         ru = tf.nn.embedding_lookup(user_vecs,
                                     tf.cast(adj_list[3], dtype=tf.int32))
         ru = tf.transpose(tf.random.shuffle(tf.transpose(ru)))
-        # ru = tf.slice(ru, [0, 0], [-1, num_samples])
 
         concate_user_vecs = tf.concat([ur, ri], axis=2)
         concate_item_vecs = tf.concat([ir, ru], axis=2)
@@ -460,6 +509,9 @@ class GASConcatenation(layers.Layer):
         super(GASConcatenation, self).__init__(**kwargs)
 
     def __call__(self, inputs):
+        """
+        :param inputs: the information passed to next layers
+        """
         adj_list, concat_vecs = inputs
         # neighbor sample
         ri = tf.nn.embedding_lookup(concat_vecs[2],
