@@ -26,11 +26,11 @@ class GAS(keras.Model):
     """
     The GAS model
 
-    :param nodes: total nodes number
     :param class_size: class number
-    :param embedding_i: item embedding size
-    :param embedding_u: user embedding size
-    :param embedding_r: review embedding size
+    :param reviews_num: total nodes number
+    :param input_dim_i: item embedding size
+    :param input_dim_u: user embedding size
+    :param input_dim_r: review embedding size
     :param gcn_dim: the gcn layer unit number
     """
 
