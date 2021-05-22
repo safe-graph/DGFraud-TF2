@@ -2,7 +2,6 @@
 DISCLAIMER:
 Parts of this code file were originally forked from
 https://github.com/tkipf/gcn
-which itself was very inspired by the keras package
 """
 
 import tensorflow as tf
@@ -41,8 +40,13 @@ def masked_accuracy(preds: tf.Tensor, labels: tf.Tensor,
     return tf.reduce_mean(accuracy_all)
 
 
-def accuracy(preds, labels):
-    """Accuracy."""
+def accuracy(preds: tf.Tensor, labels: tf.Tensor) -> tf.Tensor:
+    """
+    Accuracy.
+
+    :param preds: the class prediction probabilities of the input data
+    :param labels: the labels of the input data
+    """
     correct_prediction = tf.equal(tf.argmax(preds, 1), tf.argmax(labels, 1))
     accuracy_all = tf.cast(correct_prediction, tf.float32)
     return tf.reduce_sum(accuracy_all) / preds.shape[0]

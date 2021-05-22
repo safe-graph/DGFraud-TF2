@@ -1,12 +1,10 @@
 """
-This code is due to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
+This code is attributed to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
 Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
 DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
 https://github.com/safe-graph/DGFraud
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 
@@ -16,10 +14,6 @@ from tensorflow.keras import optimizers
 from algorithms.GAS.GAS import GAS
 from utils.data_loader import load_data_gas
 from utils.utils import preprocess_adj, preprocess_feature
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
-
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
 # init the common args, expect the model specific args
 parser = argparse.ArgumentParser()
@@ -92,7 +86,6 @@ def GAS_main(adj_list: list,
 if __name__ == "__main__":
     # load the data
     adj_list, features, [X_train, X_test], y = load_data_gas()
-    r_support, r_feature = adj_list, features
     r_feature = np.array(features[0], dtype=float)
     r_support = np.array(adj_list[6], dtype=float)
 

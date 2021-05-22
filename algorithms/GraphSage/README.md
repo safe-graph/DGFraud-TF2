@@ -1,7 +1,7 @@
 # GraphSAGE
 
 ## Paper
-The GraphSAGE model is proposed by the [paper](http://papers.nips.cc/paper/6703-inductive-representation-learning-on-large-graphs.pdf) below:
+The GraphSAGE model is proposed by the [paper](https://arxiv.org/abs/1706.02216) below:
 ```bibtex
 @inproceedings{hamilton2017inductive,
   title={Inductive representation learning on large graphs},

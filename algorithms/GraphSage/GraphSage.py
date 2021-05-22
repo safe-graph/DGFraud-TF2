@@ -1,9 +1,15 @@
 """
-This code is due to Kay Liu (@kayzliu), Yingtong Dou (@YingtongDou) and UIC BDSC Lab
-DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
-https://github.com/safe-graph/DGFraud
+This code is attributed to Kay Liu (@kayzliu), Yingtong Dou (@YingtongDou)
+and UIC BDSC Lab
+DGFraud-TF2 (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
+https://github.com/safe-graph/DGFraud-TF2
+
+Paper: 'Inductive representation learning on large graphs'
+Link: https://arxiv.org/abs/1706.02216
 """
+
 import tensorflow as tf
+
 from layers.layers import SageMeanAggregator
 
 init_fn = tf.keras.initializers.GlorotUniform
@@ -26,7 +32,8 @@ class GraphSage(tf.keras.Model):
         for i in range(1, num_layers + 1):
             layer_name = "agg_lv" + str(i)
             input_dim = internal_dim if i > 1 else features_dim
-            aggregator_layer = SageMeanAggregator(input_dim, internal_dim, name=layer_name, activ=True)
+            aggregator_layer = SageMeanAggregator(input_dim, internal_dim,
+                                                  name=layer_name, activ=True)
             self.seq_layers.append(aggregator_layer)
 
         self.classifier = tf.keras.layers.Dense(num_classes,
@@ -41,7 +48,8 @@ class GraphSage(tf.keras.Model):
         :param namedtuple minibatch: minibatch of target nodes
         :param tensor features: 2d features of nodes
         """
-        x = tf.gather(tf.constant(features, dtype=float), tf.squeeze(minibatch.src_nodes))
+        x = tf.gather(tf.constant(features, dtype=float),
+                      tf.squeeze(minibatch.src_nodes))
         for aggregator_layer in self.seq_layers:
             x = aggregator_layer(x,
                                  minibatch.dstsrc2srcs.pop(),

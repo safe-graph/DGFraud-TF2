@@ -1,5 +1,5 @@
 """
-This code is due to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
+This code is attributed to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
 Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
 DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
 https://github.com/safe-graph/DGFraud
@@ -8,18 +8,15 @@ Paper: 'Spam Review Detection with Graph Convolutional Networks'
 Link: https://arxiv.org/abs/1908.10679
 """
 
-import os
-import sys
 import argparse
 from typing import Tuple
+
 import tensorflow as tf
 from tensorflow import keras
 
 from layers.layers import ConcatenationAggregator, AttentionAggregator, \
     GASConcatenation, GraphConvolution
 from utils.metrics import accuracy
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 
 class GAS(keras.Model):

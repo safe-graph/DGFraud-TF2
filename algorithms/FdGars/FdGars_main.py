@@ -4,8 +4,6 @@ DGFraud (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 from tqdm import tqdm
@@ -17,7 +15,6 @@ from algorithms.FdGars.FdGars import FdGars
 from utils.data_loader import load_data_dblp
 from utils.utils import preprocess_adj, preprocess_feature, sample_mask
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 # init the common args, expect the model specific args
 parser = argparse.ArgumentParser()

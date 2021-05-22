@@ -5,15 +5,13 @@ DGFraud (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
 
-import os
-import sys
+
 from typing import Tuple
 import numpy as np
 import scipy.io as sio
 from sklearn.model_selection import train_test_split
-from utils.utils import pad_adjlist
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '..')))
+from utils.utils import pad_adjlist
 
 
 def load_data_dblp(path: str =

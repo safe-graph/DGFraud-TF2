@@ -1,5 +1,5 @@
 """
-This code is due to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
+This code is attributed to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
 Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
 DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
 https://github.com/safe-graph/DGFraud
@@ -9,17 +9,14 @@ over Attributed Heterogeneous Information Network Embedding Framework'
 Link: http://mason.gmu.edu/~lzhao9/materials/papers/lp0110-zhangA.pdf
 """
 
-import os
-import sys
 import argparse
 from typing import Tuple
+
 import tensorflow as tf
 from tensorflow import keras
 
 from layers.layers import AttentionLayer, GraphConvolution
 from utils.metrics import masked_softmax_cross_entropy, masked_accuracy
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 
 class Player2Vec(keras.Model):

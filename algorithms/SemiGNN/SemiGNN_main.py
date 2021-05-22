@@ -1,12 +1,10 @@
 """
 This code is due to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
 Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
-DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
-https://github.com/safe-graph/DGFraud
+DGFraud-TF2 (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
+https://github.com/safe-graph/DGFraud-TF2
 """
 
-import os
-import sys
 import argparse
 import numpy as np
 
@@ -17,10 +15,6 @@ from algorithms.SemiGNN.SemiGNN import SemiGNN
 from utils.data_loader import load_example_semi
 from utils.utils import matrix_to_adjlist, random_walks, pairs_to_matrix, \
     get_negative_sampling
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
-
-# os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
 # init the common args, expect the model specific args
 parser = argparse.ArgumentParser()

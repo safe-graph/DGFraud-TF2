@@ -1,25 +1,22 @@
 """
 This code is due to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
 Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
-DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
-https://github.com/safe-graph/DGFraud
+DGFraud-TF2 (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
+https://github.com/safe-graph/DGFraud-TF2
 
 Paper: 'A Semi-supervised Graph Attentive Network for
         Financial Fraud Detection'
 Link: https://arxiv.org/pdf/2003.01171
 """
 
-import os
-import sys
 import argparse
 from typing import Tuple
+
 import tensorflow as tf
 from tensorflow import keras
 
 from layers.layers import AttentionLayer
 from utils.metrics import accuracy
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 
 class SemiGNN(keras.Model):

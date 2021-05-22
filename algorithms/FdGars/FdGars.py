@@ -8,8 +8,6 @@ in Online App Review System'
 Link: https://dl.acm.org/citation.cfm?id=3316586
 """
 
-import os
-import sys
 import argparse
 from typing import Tuple
 import tensorflow as tf
@@ -17,8 +15,6 @@ from tensorflow import keras
 
 from layers.layers import GraphConvolution
 from utils.metrics import masked_accuracy, masked_softmax_cross_entropy
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 
 class FdGars(keras.Model):

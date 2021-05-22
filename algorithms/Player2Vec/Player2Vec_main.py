@@ -1,24 +1,20 @@
 """
-This code is due to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
+This code is attributed to Yutong Deng (@yutongD), Yingtong Dou (@YingtongDou),
 Zhongzheng Lu(@lzz-hub-dev) and UIC BDSC Lab
 DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
 https://github.com/safe-graph/DGFraud
 """
 
-import os
-import sys
 import argparse
 import numpy as np
+from tqdm import tqdm
 
 import tensorflow as tf
 from tensorflow.keras import optimizers
 
 from algorithms.Player2Vec.Player2Vec import Player2Vec
-from tqdm import tqdm
 from utils.data_loader import load_data_dblp
 from utils.utils import preprocess_adj, preprocess_feature, sample_mask
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 

@@ -1,35 +1,35 @@
 """
-This code is due to Kay Liu (@kayzliu), Yingtong Dou (@YingtongDou) and UIC BDSC Lab
-DGFraud (A Deep Graph-based Toolbox for Fraud Detection)
-https://github.com/safe-graph/DGFraud
+This code is attributed to Kay Liu (@kayzliu), Yingtong Dou (@YingtongDou)
+and UIC BDSC Lab
+DGFraud-TF2 (A Deep Graph-based Toolbox for Fraud Detection in TensorFlow 2.X)
+https://github.com/safe-graph/DGFraud-TF2
 """
-import os
-import sys
+
 import argparse
+import numpy as np
+import collections
+from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
-
-import numpy as np
-
-np.seterr(divide='ignore', invalid='ignore')
 import tensorflow as tf
-import collections
-from sklearn.metrics import f1_score, accuracy_score
 
-from GraphSage import GraphSage
-from utils.data_loader import *
-from utils.utils import *
+from algorithms.GraphSage.GraphSage import GraphSage
+from utils.data_loader import load_data_yelp
+from utils.utils import preprocess_feature
 
 # init the common args, expect the model specific args
 parser = argparse.ArgumentParser()
 parser.add_argument('--seed', type=int, default=717, help='random seed')
-parser.add_argument('--epochs', type=int, default=5, help='number of epochs to train')
+parser.add_argument('--epochs', type=int, default=5,
+                    help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=512, help='batch size')
-parser.add_argument('--train_size', type=float, default=0.8, help='training set percentage')
+parser.add_argument('--train_size', type=float, default=0.8,
+                    help='training set percentage')
 parser.add_argument('--lr', type=float, default=0.5, help='learning rate')
-parser.add_argument('--nhid', type=int, default=128, help='number of hidden units')
-parser.add_argument('--sample_sizes', type=list, default=[5, 5], help='number of samples for each layer')
+parser.add_argument('--nhid', type=int, default=128,
+                    help='number of hidden units')
+parser.add_argument('--sample_sizes', type=list, default=[5, 5],
+                    help='number of samples for each layer')
 args = parser.parse_args()
 
 # set seed
@@ -43,13 +43,15 @@ def main(neigh_dict, features, labels, masks, num_classes, args):
     test_nodes = masks[2]
 
     # training
-    def generate_training_minibatch(nodes_for_training, all_labels, batch_size):
+    def generate_training_minibatch(nodes_for_training,
+                                    all_labels, batch_size):
         nodes_for_epoch = np.copy(nodes_for_training)
         ix = 0
         np.random.shuffle(nodes_for_epoch)
         while len(nodes_for_epoch) > ix + batch_size:
             mini_batch_nodes = nodes_for_epoch[ix:ix + batch_size]
-            batch = build_batch(mini_batch_nodes, neigh_dict, args.sample_sizes)
+            batch = build_batch(mini_batch_nodes,
+                                neigh_dict, args.sample_sizes)
             labels = all_labels[mini_batch_nodes]
             ix += batch_size
             yield (batch, labels)
@@ -58,34 +60,43 @@ def main(neigh_dict, features, labels, masks, num_classes, args):
         labels = all_labels[mini_batch_nodes]
         yield (batch, labels)
 
-    model = GraphSage(features.shape[-1], args.nhid, len(args.sample_sizes), num_classes)
+    model = GraphSage(features.shape[-1], args.nhid,
+                      len(args.sample_sizes), num_classes)
     optimizer = tf.keras.optimizers.SGD(learning_rate=args.lr)
     loss_fn = tf.keras.losses.SparseCategoricalCrossentropy()
 
     for epoch in range(args.epochs):
         print(f"Epoch {epoch:d}: training...")
-        minibatch_generator = generate_training_minibatch(train_nodes, labels, args.batch_size)
-        for inputs, inputs_labels in tqdm(minibatch_generator, total=len(train_nodes) / args.batch_size):
+        minibatch_generator = generate_training_minibatch(
+            train_nodes, labels, args.batch_size)
+        for inputs, inputs_labels in tqdm(
+                minibatch_generator, total=len(train_nodes) / args.batch_size):
             with tf.GradientTape() as tape:
                 predicted = model(inputs, features)
                 loss = loss_fn(tf.convert_to_tensor(inputs_labels), predicted)
-                acc = accuracy_score(inputs_labels, predicted.numpy().argmax(axis=1))
+                acc = accuracy_score(inputs_labels,
+                                     predicted.numpy().argmax(axis=1))
             grads = tape.gradient(loss, model.trainable_weights)
             optimizer.apply_gradients(zip(grads, model.trainable_weights))
             print(f" loss: {loss.numpy():.4f}, acc: {acc:.4f}")
 
         # validation
         print("Validating...")
-        val_results = model(build_batch(val_nodes, neigh_dict, args.sample_sizes), features)
+        val_results = model(build_batch(
+            val_nodes, neigh_dict, args.sample_sizes), features)
         loss = loss_fn(tf.convert_to_tensor(labels[val_nodes]), val_results)
-        val_acc = accuracy_score(labels[val_nodes], val_results.numpy().argmax(axis=1))
-        print(f" Epoch: {epoch:d}, loss: {loss.numpy():.4f}, acc: {val_acc:.4f}")
+        val_acc = accuracy_score(labels[val_nodes],
+                                 val_results.numpy().argmax(axis=1))
+        print(f"Epoch: {epoch:d}, "
+              f"loss: {loss.numpy():.4f}, "
+              f"acc: {val_acc:.4f}")
 
     # testing
     print("Testing...")
-    results = model(build_batch(test_nodes, neigh_dict, args.sample_sizes), features)
-    # score = f1_score(labels[test_nodes], results.numpy().argmax(axis=1), average="micro")
-    test_acc = accuracy_score(labels[test_nodes], results.numpy().argmax(axis=1))
+    results = model(build_batch(
+        test_nodes, neigh_dict, args.sample_sizes), features)
+    test_acc = accuracy_score(labels[test_nodes],
+                              results.numpy().argmax(axis=1))
     print(f"Test acc: {test_acc:.4f}")
 
 
@@ -93,10 +104,12 @@ def build_batch(nodes, neigh_dict, sample_sizes):
     """
     :param [int] nodes: node ids
     :param {node:[node]} neigh_dict: BIDIRECTIONAL adjacency matrix in dict
-    :param [sample_size]: sample sizes for each layer, lens is the number of layers
+    :param [sample_size]: sample sizes for each layer,
+    lens is the number of layers
     :param tensor features: 2d features of nodes
     :return namedtuple minibatch
-        "src_nodes": node ids to retrieve from raw feature and feed to the first layer
+        "src_nodes": node ids to retrieve from raw feature
+        and feed to the first layer
         "dstsrc2srcs": list of dstsrc2src matrices from last to first layer
         "dstsrc2dsts": list of dstsrc2dst matrices from last to first layer
         "dif_mats": list of dif_mat matrices from last to first layer
@@ -138,7 +151,8 @@ def compute_diffusion_matrix(dst_nodes, neigh_dict, sample_size, max_node_id):
         return v
 
     # sample neighbors
-    adj_mat_full = np.stack([vectorize(sample(neigh_dict[n])) for n in dst_nodes])
+    adj_mat_full = np.stack([vectorize(
+        sample(neigh_dict[n])) for n in dst_nodes])
     nonzero_cols_mask = np.any(adj_mat_full.astype(np.bool), axis=0)
 
     # compute diffusion matrix
@@ -148,7 +162,8 @@ def compute_diffusion_matrix(dst_nodes, neigh_dict, sample_size, max_node_id):
 
     # compute dstsrc mappings
     src_nodes = np.arange(nonzero_cols_mask.size)[nonzero_cols_mask]
-    # np.union1d automatic sorts the return, which is required for np.searchsorted
+    # np.union1d automatic sorts the return,
+    # which is required for np.searchsorted
     dstsrc = np.union1d(dst_nodes, src_nodes)
     dstsrc2src = np.searchsorted(dstsrc, src_nodes)
     dstsrc2dst = np.searchsorted(dstsrc, dst_nodes)
@@ -158,7 +173,8 @@ def compute_diffusion_matrix(dst_nodes, neigh_dict, sample_size, max_node_id):
 
 if __name__ == "__main__":
     # load the data
-    adj_list, features, split_ids, y = load_data_yelp(meta=False, train_size=args.train_size)
+    adj_list, features, split_ids, y = load_data_yelp(
+        meta=False, train_size=args.train_size)
     idx_train, _, idx_val, _, idx_test, _ = split_ids
 
     num_classes = len(set(y))
@@ -178,6 +194,8 @@ if __name__ == "__main__":
         for node1, node2 in zip(nodes1, nodes2):
             neigh_dict[node1].append(node2)
 
-    neigh_dict = {k: np.array(v, dtype=np.int64) for k, v in neigh_dict.items()}
+    neigh_dict = {k: np.array(v, dtype=np.int64)
+                  for k, v in neigh_dict.items()}
 
-    main(neigh_dict, features, label, [idx_train, idx_val, idx_test], num_classes, args)
+    main(neigh_dict, features, label, [idx_train, idx_val, idx_test],
+         num_classes, args)

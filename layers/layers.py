@@ -5,8 +5,9 @@ DGFraud (A Deep Graph-based Toolbox for Fraud Detection  in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
 
-import tensorflow as tf
 from typing import Callable, Optional, Tuple
+
+import tensorflow as tf
 from tensorflow.keras import layers
 
 
@@ -334,9 +335,12 @@ class SageMeanAggregator(layers.Layer):
     def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat):
         """
         :param tensor dstsrc_features: the embedding from the previous layer
-        :param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
-        :param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
-        :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+        :param tensor dstsrc2dst: 1d index mapping
+                      (prepraed by minibatch generator)
+        :param tensor dstsrc2src: 1d index mapping
+                      (prepraed by minibatch generator)
+        :param tensor dif_mat: 2d diffusion matrix
+                      (prepraed by minibatch generator)
         """
         dst_features = tf.gather(dstsrc_features, dstsrc2dst)
         src_features = tf.gather(dstsrc_features, dstsrc2src)
@@ -360,13 +364,16 @@ class ConsisMeanAggregator(SageMeanAggregator):
         """
         super().__init__(src_dim, dst_dim, activ=False, **kwargs)
 
-    def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat,
+    def call(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat,
                  relation_vec, attention_vec):
         """
         :param tensor dstsrc_features: the embedding from the previous layer
-        :param tensor dstsrc2dst: 1d index mapping (prepraed by minibatch generator)
-        :param tensor dstsrc2src: 1d index mapping (prepraed by minibatch generator)
-        :param tensor dif_mat: 2d diffusion matrix (prepraed by minibatch generator)
+        :param tensor dstsrc2dst: 1d index mapping
+                      (prepraed by minibatch generator)
+        :param tensor dstsrc2src: 1d index mapping
+                      (prepraed by minibatch generator)
+        :param tensor dif_mat: 2d diffusion matrix
+                      (prepraed by minibatch generator)
         :param tensor relation_vec: 1d corresponding relation vector
         :param tensor attention_vec: 1d layers shared attention weights vector
         """
