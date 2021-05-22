@@ -55,6 +55,7 @@ def load_data_dblp(path: str =
 
     return rownetworks, features, split_ids, np.array(y)
 
+
 def load_data_yelp(path: str = 'dataset/YelpChi.mat',
                    train_size: int = 0.8, meta: bool = True) -> \
         Tuple[list, np.array, list, np.array]:
@@ -67,23 +68,33 @@ def load_data_yelp(path: str = 'dataset/YelpChi.mat',
     :param meta: if True: it loads a HIN with three meta-graphs,
                  if False: it loads a homogeneous rur meta-graph
     """
-	data = sio.loadmat(path)
-	truelabels, features = data['label'], data['features'].astype(float)
-	truelabels = truelabels.tolist()[0]
+    data = sio.loadmat(path)
+    truelabels, features = data['label'], data['features'].astype(float)
+    truelabels = truelabels.tolist()[0]
 
-	if not meta:
-		rownetworks = [data['net_rur']]
-	else:
-		rownetworks = [data['net_rur'], data['net_rsr'], data['net_rtr']]
+    if not meta:
+        rownetworks = [data['net_rur']]
+    else:
+        rownetworks = [data['net_rur'], data['net_rsr'], data['net_rtr']]
 
-	y = truelabels
-	index = np.arange(len(y))
-	X_train, X_test, y_train, y_test = train_test_split(index, y, stratify=y, test_size=1-train_size, random_state=48, shuffle=True)
-	X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, stratify=y_train, test_size=0.2, random_state=48, shuffle=True)
+    y = truelabels
+    index = np.arange(len(y))
+    X_train, X_test, y_train, y_test = train_test_split(index,
+                                                        y,
+                                                        stratify=y,
+                                                        test_size=1-train_size,
+                                                        random_state=48,
+                                                        shuffle=True)
+    X_train, X_val, y_train, y_val = train_test_split(X_train,
+                                                      y_train,
+                                                      stratify=y_train,
+                                                      test_size=0.2,
+                                                      random_state=48,
+                                                      shuffle=True)
 
     split_ids = [X_train, y_train, X_val, y_val, X_test, y_test]
 
-	return rownetworks, features, split_ids, np.array(y)
+    return rownetworks, features, split_ids, np.array(y)
 
 
 def load_example_semi():
