@@ -181,4 +181,4 @@ The repository is organized as follows:
 
 
 ## How to Contribute
-You are welcomed to contribute to this open-source toolbox. The detailed instructions will be released soon. Currently, you can create issues or send email to [bdscsafegraph@gmail.com](mailto:bdscsafegraph@gmail.com) for inquiry.
+You are welcomed to contribute to this open-source toolbox. Currently, you can create PR or send email to [bdscsafegraph@gmail.com](mailto:bdscsafegraph@gmail.com) for inquiry.
