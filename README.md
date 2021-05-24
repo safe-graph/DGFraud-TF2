@@ -15,9 +15,6 @@
     <a href="https://www.python.org/">
         <img alt="GitHub" src="https://img.shields.io/badge/python-3.6%2C%203.7%2C%203.8%2C%203.9-blue">
     </a>
-    <a href="https://github.com/safe-graph/DGFraud-TF2/blob/main/LICENSE">
-        <img alt="GitHub" src="https://img.shields.io/github/license/safe-graph/DGFraud-TF2">
-    </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/pulls">
         <img alt="GitHub release" src="https://img.shields.io/github/v/release/safe-graph/DGFraud-TF2?include_prereleases">
     </a>
