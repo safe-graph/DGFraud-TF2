@@ -9,6 +9,7 @@ from typing import Callable, Optional, Tuple
 
 import tensorflow as tf
 from tensorflow.keras import layers
+from tensorflow.keras.initializers import GlorotUniform
 
 
 def sparse_dropout(x: tf.SparseTensor, rate: float,
@@ -285,7 +286,7 @@ class ConcatenationAggregator(layers.Layer):
                                                [input_dim, output_dim],
                                                dtype=tf.float32)
 
-    def __call__(self, inputs):
+    def call(self, inputs):
         """
         :param inputs: the information passed to next layers
         """
@@ -328,11 +329,11 @@ class SageMeanAggregator(layers.Layer):
         self.w = self.add_weight(name=kwargs["name"] + "_weight",
                                  shape=(src_dim * 2, dst_dim),
                                  dtype=tf.float32,
-                                 initializer=init_fn,
+                                 initializer=GlorotUniform,
                                  trainable=True
                                  )
 
-    def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat):
+    def call(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat):
         """
         :param tensor dstsrc_features: the embedding from the previous layer
         :param tensor dstsrc2dst: 1d index mapping
@@ -364,7 +365,7 @@ class ConsisMeanAggregator(SageMeanAggregator):
         """
         super().__init__(src_dim, dst_dim, activ=False, **kwargs)
 
-    def call(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat,
+    def __call__(self, dstsrc_features, dstsrc2src, dstsrc2dst, dif_mat,
                  relation_vec, attention_vec):
         """
         :param tensor dstsrc_features: the embedding from the previous layer
@@ -523,13 +524,56 @@ class GASConcatenation(layers.Layer):
         # neighbor sample
         ri = tf.nn.embedding_lookup(concat_vecs[2],
                                     tf.cast(adj_list[5], dtype=tf.int32))
-        # ri = tf.transpose(tf.random.shuffle(tf.transpose(ri)))
-        # ir = tf.slice(ir, [0, 0], [-1, num_samples])
 
         ru = tf.nn.embedding_lookup(concat_vecs[1],
                                     tf.cast(adj_list[4], dtype=tf.int32))
-        # ru = tf.transpose(tf.random.shuffle(tf.transpose(ru)))
-        # ru = tf.slice(ru, [0, 0], [-1, num_samples])
+
         concate_vecs = tf.concat([ri, concat_vecs[0], ru, concat_vecs[3]],
                                  axis=1)
         return concate_vecs
+
+
+class GEMLayer(layers.Layer):
+    """
+    This layer equals to the equation (8) in
+    paper 'Heterogeneous Graph Neural Networks
+    for Malicious Account Detection.'
+    """
+
+    def __init__(self, nodes_num, input_dim, output_dim, device_num, **kwargs):
+        super(GEMLayer, self).__init__(**kwargs)
+
+        self.nodes_num = nodes_num
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+        self.device_num = device_num
+        self.W = self.add_weight('weight', [input_dim, output_dim],
+                                 dtype=tf.float32)
+        self.V = self.add_weight('V', [output_dim, output_dim],
+                                 dtype=tf.float32)
+        self.alpha = self.add_weight('alpha', [self.device_num, 1],
+                                     dtype=tf.float32)
+
+    def call(self, inputs):
+        """
+        :@param inputs: include x, support, h
+        x: the node feature
+        support: a list of the sparse adjacency Tensor
+        h: the hidden layer Tensor
+        """
+        x, support_, h = inputs
+        h1 = dot(x, self.W, sparse=True)
+        h2 = []
+
+        for d in range(self.device_num):
+            ahv = dot(dot(support_[d], h, sparse=True), self.V, sparse=False)
+            h2.append(ahv)
+
+        h2 = tf.concat(h2, 0)
+        h2 = tf.reshape(h2, [self.device_num,
+                             self.nodes_num * self.output_dim])
+        h2 = tf.transpose(h2, [1, 0])
+        h2 = tf.reshape(tf.matmul(h2, tf.nn.softmax(self.alpha)),
+                        [self.nodes_num, self.output_dim])
+
+        return tf.nn.relu(h1 + h2)

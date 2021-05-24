@@ -41,7 +41,7 @@ np.random.seed(args.seed)
 tf.random.set_seed(args.seed)
 
 
-def main(neigh_dicts, features, labels, masks, num_classes, args):
+def GraphConsis_main(neigh_dicts, features, labels, masks, num_classes, args):
 
     train_nodes = masks[0]
     val_nodes = masks[1]
@@ -77,9 +77,9 @@ def main(neigh_dicts, features, labels, masks, num_classes, args):
                                                           labels,
                                                           args.batch_size,
                                                           features)
-        for inputs, inputs_labels in tqdm(minibatch_generator,
-                                          total=len(train_nodes) /
-                                                args.batch_size):
+        batchs = len(train_nodes) / args.batch_size
+        for inputs, inputs_labels in tqdm(minibatch_generator, total=batchs):
+
             with tf.GradientTape() as tape:
                 predicted = model(inputs, features)
                 loss = loss_fn(tf.convert_to_tensor(inputs_labels), predicted)
@@ -229,5 +229,5 @@ if __name__ == "__main__":
         neigh_dicts.append({k: np.array(v, dtype=np.int64)
                             for k, v in neigh_dict.items()})
 
-    main(neigh_dicts, features, label, [idx_train, idx_val, idx_test],
-         num_classes, args)
+    GraphConsis_main(neigh_dicts, features, label,
+                     [idx_train, idx_val, idx_test], num_classes, args)

@@ -37,7 +37,7 @@ np.random.seed(args.seed)
 tf.random.set_seed(args.seed)
 
 
-def main(neigh_dict, features, labels, masks, num_classes, args):
+def GraphSage_main(neigh_dict, features, labels, masks, num_classes, args):
     train_nodes = masks[0]
     val_nodes = masks[1]
     test_nodes = masks[2]
@@ -197,5 +197,5 @@ if __name__ == "__main__":
     neigh_dict = {k: np.array(v, dtype=np.int64)
                   for k, v in neigh_dict.items()}
 
-    main(neigh_dict, features, label, [idx_train, idx_val, idx_test],
-         num_classes, args)
+    GraphSage_main(neigh_dict, features, label,
+                   [idx_train, idx_val, idx_test], num_classes, args)

@@ -69,9 +69,10 @@ def FdGars_main(support: list,
 
         if epoch % 10 == 0:
             print(
-                f"Epoch: {epoch:d}, train_loss: {train_loss:.4f}, "
+                f"train_loss: {train_loss:.4f}, "
                 f"train_acc: {train_acc:.4f},"
-                f"val_loss: {val_loss:.4f}, val_acc: {val_acc:.4f}")
+                f"val_loss: {val_loss:.4f},"
+                f"val_acc: {val_acc:.4f}")
 
     # test
     _, test_acc = model([support, features, label, masks[2]], training=False)

@@ -7,6 +7,7 @@ https://github.com/safe-graph/DGFraud
 
 import argparse
 import numpy as np
+from tqdm import tqdm
 
 import tensorflow as tf
 from tensorflow.keras import optimizers
@@ -68,7 +69,7 @@ def GAS_main(adj_list: list,
     optimizer = optimizers.Adam(lr=args.lr)
 
     # train
-    for epoch in range(args.epochs):
+    for _ in tqdm(range(args.epochs)):
         with tf.GradientTape() as tape:
             train_loss, train_acc = model(
                 [adj_list, r_support, features, r_feature, label, masks[0]], )
