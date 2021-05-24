@@ -124,7 +124,7 @@ or by editing xx_main.py
 ### The structure of code
 The repository is organized as follows:
 - `algorithms/` contains the implemented models and the corresponding example code;
-- `base_models/` contains the basic models (GCN);
+- `layers/` contains all GNN layers used by implemented models;
 - `dataset/` contains the necessary dataset files;
 - `utils/` contains:
     * loading and splitting the data (`data_loader.py`);
