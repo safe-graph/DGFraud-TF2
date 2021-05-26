@@ -57,9 +57,12 @@ def SemiGNN_main(adj_list: list,
     :param adj_list: a list of the sparse adjacency matrices
     :param label: the label tensor for all nodes
     :param masks: a list of mask tensors to obtain the train, val, test data
-    :param args: additional parameters
+    :param args: model arguments
     """
-    model = SemiGNN(args)
+    model = SemiGNN(args.nodes, args.class_size, args.semi_encoding1,
+                    args.semi_encoding2, args.semi_encoding3,
+                    args.init_emb_size, args.meta, args.batch_size, args.alpha)
+
     optimizer = optimizers.Adam(lr=args.lr)
     adj_nodelists = [matrix_to_adjlist(adj, pad=False) for adj in
                      adj_list]

@@ -9,7 +9,6 @@ Paper: 'A Semi-supervised Graph Attentive Network for
 Link: https://arxiv.org/pdf/2003.01171
 """
 
-import argparse
 from typing import Tuple
 
 import tensorflow as tf
@@ -22,29 +21,30 @@ from utils.metrics import accuracy
 class SemiGNN(keras.Model):
     """
     The SemiGNN model
-
-    :param nodes: total nodes number
-    :param semi_encoding1: the first view attention layer unit number
-    :param semi_encoding2: the second view attention layer unit number
-    :param semi_encoding3: MLP layer unit number
-    :param init_emb_size: the initial node embedding
-    :param meta: view number
-    :param ul: labeled users number
     """
-
-    def __init__(self, args: argparse.ArgumentParser().parse_args()) -> None:
+    def __init__(self, nodes: int, class_size: int, semi_encoding1: int,
+                 semi_encoding2: int, semi_encoding3: int, init_emb_size: int,
+                 meta: int, batch_size: int, alpha: float) -> None:
+        """
+        :param nodes: total nodes number
+        :param semi_encoding1: the first view attention layer unit number
+        :param semi_encoding2: the second view attention layer unit number
+        :param semi_encoding3: MLP layer unit number
+        :param init_emb_size: the initial node embedding
+        :param meta: view number
+        :param alpha: the coefficient of loss function
+        """
         super().__init__()
 
-        self.nodes = args.nodes
-        self.class_size = args.class_size
-        self.semi_encoding1 = args.semi_encoding1
-        self.semi_encoding2 = args.semi_encoding2
-        self.semi_encoding3 = args.semi_encoding3
-        self.init_emb_size = args.init_emb_size
-        self.meta = args.meta
-        self.batch_size = args.batch_size
-        self.alpha = args.alpha
-        self.lamtha = args.lamtha
+        self.nodes = nodes
+        self.class_size = class_size
+        self.semi_encoding1 = semi_encoding1
+        self.semi_encoding2 = semi_encoding2
+        self.semi_encoding3 = semi_encoding3
+        self.init_emb_size = init_emb_size
+        self.meta = meta
+        self.batch_size = batch_size
+        self.alpha = alpha
 
         # init embedding
         self.x_init = tf.keras.initializers.GlorotUniform()
@@ -66,7 +66,6 @@ class SemiGNN(keras.Model):
         """
         adj_data, u_i, u_j, graph_label, label, idx_mask = inputs
 
-        # forward propagation
         h1 = []
         for i in range(self.meta):
             h = AttentionLayer.node_attention(inputs=self.emb, adj=adj_data[i])
@@ -85,7 +84,7 @@ class SemiGNN(keras.Model):
         masked_data = tf.gather(a_u, idx_mask)
         masked_label = tf.gather(label, idx_mask)
 
-        # calculation loss and accuracy()
+        # calculation loss and accuracy
         logits = tf.nn.softmax(tf.matmul(masked_data, self.u))
         loss1 = -(1 / self.batch_size) * tf.reduce_sum(
             masked_label * tf.math.log(tf.nn.softmax(logits)))

@@ -232,7 +232,6 @@ args.eps = 0.001
 features = preprocess_feature(features, to_tuple=False)
 features = np.array(features.todense())
 
-# Equation 2 in the paper
 features = np.concatenate((features,
                            np.random.rand(features.shape[0],
                                           args.identity_dim)), axis=1)

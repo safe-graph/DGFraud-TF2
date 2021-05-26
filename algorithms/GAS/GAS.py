@@ -22,16 +22,12 @@ from utils.metrics import accuracy
 class GAS(keras.Model):
     """
     The GAS model
-
-    :param class_size: class number
-    :param reviews_num: total nodes number
-    :param input_dim_i: item embedding size
-    :param input_dim_u: user embedding size
-    :param input_dim_r: review embedding size
-    :param gcn_dim: the gcn layer unit number
     """
 
     def __init__(self, args: argparse.ArgumentParser().parse_args()) -> None:
+        """
+        :param args: argument used by the GAS model
+        """
         super().__init__()
 
         self.class_size = args.class_size
@@ -55,12 +51,14 @@ class GAS(keras.Model):
             input_dim=self.input_dim_r + self.input_dim_u + self.input_dim_i,
             output_dim=self.output_dim1, )
 
+        # item user aggregator
         self.iu_agg_layer = AttentionAggregator(input_dim1=self.h_u_size,
                                                 input_dim2=self.h_i_size,
                                                 output_dim=self.output_dim3,
                                                 hid_dim=self.output_dim2,
                                                 concat=True)
 
+        # review aggregator
         self.r_gcn_layer = GraphConvolution(input_dim=self.input_dim_r_gcn,
                                             output_dim=self.output_dim5,
                                             num_features_nonzero=self.

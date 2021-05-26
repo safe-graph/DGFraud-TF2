@@ -9,20 +9,23 @@ Paper: 'Alleviating the Inconsistency Problem of
 Link: https://arxiv.org/abs/2005.00625
 """
 
+from collections import namedtuple
+
 import tensorflow as tf
+from tensorflow import keras
 
 from layers.layers import ConsisMeanAggregator
 
 init_fn = tf.keras.initializers.GlorotUniform
 
 
-class GraphConsis(tf.keras.Model):
+class GraphConsis(keras.Model):
     """
-    GraphConsis base model outputing embeddings of given nodes
+    The GraphConsis model
     """
 
-    def __init__(self, features_dim, internal_dim,
-                 num_layers, num_classes, num_relations):
+    def __init__(self, features_dim: int, internal_dim: int, num_layers: int,
+                 num_classes: int, num_relations: int) -> None:
         """
         :param int features_dim: input dimension
         :param int internal_dim: hidden layer dimension
@@ -50,10 +53,11 @@ class GraphConsis(tf.keras.Model):
                                                 name="classifier",
                                                 )
 
-    def call(self, minibatchs, features):
+    def call(self, minibatchs: namedtuple, features: tf.Tensor) -> tf.Tensor:
         """
-        :param [namedtuple] minibatchs: minibatch list of each relation
-        :param tensor features: 2d features of nodes
+        Forward propagation
+        :param minibatchs: minibatch list of each relation
+        :param features: 2d features of nodes
         """
         xs = []
         for i, minibatch in enumerate(minibatchs):

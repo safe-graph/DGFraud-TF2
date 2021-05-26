@@ -22,16 +22,17 @@ from utils.metrics import masked_softmax_cross_entropy, masked_accuracy
 class Player2Vec(keras.Model):
     """
     The Player2Vec model
-
-    :param input_dim: the input feature dimension
-    :param nhid: the output embedding dimension of the first GCN layer
-    :param output_dim: the output embedding dimension of the last GCN layer
-    (number of classes)
-    :param args: additional parameters
     """
 
-    def __init__(self, input_dim, nhid, output_dim,
+    def __init__(self, input_dim: int, nhid: int, output_dim: int,
                  args: argparse.ArgumentParser().parse_args()) -> None:
+        """
+        :param input_dim: the input feature dimension
+        :param nhid: the output embedding dimension of the first GCN layer
+        :param output_dim: the output embedding dimension of the last GCN layer
+        (number of classes)
+        :param args: additional parameters
+        """
         super().__init__()
 
         self.input_dim = input_dim

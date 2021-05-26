@@ -17,7 +17,7 @@ init_fn = tf.keras.initializers.GlorotUniform
 
 class GraphSage(tf.keras.Model):
     """
-    GraphSage base model outputing embeddings of given nodes
+    GraphSage model
     """
 
     def __init__(self, features_dim, internal_dim, num_layers, num_classes):

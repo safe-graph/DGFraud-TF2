@@ -10,10 +10,10 @@
         <img alt="PRs Welcome" src="https://travis-ci.com/safe-graph/DGFraud-TF2.svg?token=wicswr4X2g4v8jddTpUv&branch=main">
     </a>
     <a href="https://www.tensorflow.org/install">
-        <img alt="GitHub" src="https://img.shields.io/badge/tensorflow-2.X-yellow">
+        <img alt="GitHub" src="https://img.shields.io/badge/tensorflow-2.X-orange">
     </a>
     <a href="https://www.python.org/">
-        <img alt="GitHub" src="https://img.shields.io/badge/python-3.6%2C%203.7%2C%203.8%2C%203.9-blue">
+        <img alt="GitHub" src="https://img.shields.io/badge/python-3.6%2C%203.7%2C%203.8%2C%203.9-yellowgreen">
     </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/pulls">
         <img alt="GitHub release" src="https://img.shields.io/github/v/release/safe-graph/DGFraud-TF2?include_prereleases">

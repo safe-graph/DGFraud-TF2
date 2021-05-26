@@ -41,13 +41,13 @@ tf.random.set_seed(args.seed)
 
 
 def GEM_main(supports: list, features: tf.SparseTensor,
-             label: tf.Tensor, masks: list, args):
+             label: tf.Tensor, masks: list, args) -> None:
     """
-    @param supports: a list of the sparse adjacency matrix
-    @param features: the feature of the sparse tensor for all nodes
-    @param label: the label tensor for all nodes
-    @param masks: a list of mask tensors to obtain the train-val-test data
-    @param args: additional parameters
+    :param supports: a list of the sparse adjacency matrix
+    :param features: the feature of the sparse tensor for all nodes
+    :param label: the label tensor for all nodes
+    :param masks: a list of mask tensors to obtain the train-val-test data
+    :param args: additional parameters
     """
     model = GEM(args.input_dim, args.output_dim, args)
     optimizer = optimizers.Adam(lr=args.lr)

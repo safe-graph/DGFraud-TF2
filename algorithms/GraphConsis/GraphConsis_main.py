@@ -7,7 +7,7 @@ https://github.com/safe-graph/DGFraud-TF2
 
 import argparse
 import numpy as np
-import collections
+from collections import namedtuple
 from tqdm import tqdm
 from sklearn.metrics import accuracy_score
 
@@ -109,14 +109,14 @@ def GraphConsis_main(neigh_dicts, features, labels, masks, num_classes, args):
     print(f"Test acc: {test_acc:.4f}")
 
 
-def build_batch(nodes, neigh_dicts, sample_sizes, features):
+def build_batch(nodes: list, neigh_dicts: dict, sample_sizes: list,
+                features: np.array) -> [namedtuple]:
     """
-    :param [int] nodes: node ids
-    :param {node:[node]} neigh_dict: BIDIRECTIONAL adjacency matrix in dict
-    :param [sample_size]: sample sizes for each layer,
-    lens is the number of layers
-    :param tensor features: 2d features of nodes
-    :return namedtuple minibatch
+    :param nodes: node ids
+    :param neigh_dicts: BIDIRECTIONAL adjacency matrix in dict {node:[node]}
+    :param sample_sizes: sample size for each layer
+    :param features: 2d features of nodes
+    :return a list of namedtuple minibatch
         "src_nodes": node ids to retrieve from raw feature and
         feed to the first layer
         "dstsrc2srcs": list of dstsrc2src matrices from last to first layer
@@ -149,7 +149,7 @@ def build_batch(nodes, neigh_dicts, sample_sizes, features):
 
         MiniBatchFields = ["src_nodes", "dstsrc2srcs",
                            "dstsrc2dsts", "dif_mats"]
-        MiniBatch = collections.namedtuple("MiniBatch", MiniBatchFields)
+        MiniBatch = namedtuple("MiniBatch", MiniBatchFields)
         output.append(MiniBatch(src_nodes, dstsrc2srcs, dstsrc2dsts, dif_mats))
 
     return output
