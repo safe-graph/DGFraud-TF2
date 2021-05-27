@@ -89,7 +89,7 @@ if __name__ == "__main__":
     args.device_num = len(adj_list)
 
     features = preprocess_feature(features)
-    supports = [preprocess_adj(adj) for adj in adj_list]
+    supports = [preprocess_adj(*adj_list)]
 
     # get sparse tensors
     features = tf.cast(tf.SparseTensor(*features), dtype=tf.float32)

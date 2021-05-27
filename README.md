@@ -13,13 +13,13 @@
         <img alt="GitHub" src="https://img.shields.io/badge/tensorflow-2.X-orange">
     </a>
     <a href="https://www.python.org/">
-        <img alt="GitHub" src="https://img.shields.io/badge/python-3.6%2C%203.7%2C%203.8%2C%203.9-yellowgreen">
-    </a>
-    <a href="https://github.com/safe-graph/DGFraud-TF2/pulls">
-        <img alt="GitHub release" src="https://img.shields.io/github/v/release/safe-graph/DGFraud-TF2?include_prereleases">
+        <img alt="GitHub" src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue">
     </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/archive/main.zip">
         <img alt="PRs" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg">
+    </a>
+    <a href="https://github.com/safe-graph/DGFraud-TF2/pulls">
+        <img alt="GitHub release" src="https://img.shields.io/github/v/release/safe-graph/DGFraud-TF2?include_prereleases">
     </a>
 </p>
 
@@ -92,10 +92,11 @@ For [GraphConsis](https://arxiv.org/abs/2005.00625) and [GraphSAGE](https://arxi
 
 The dataset with `.mat` format is located at `/dataset/YelpChi.zip`. The `.mat` file includes:
 - `net_rur, net_rtr, net_rsr`: three sparse matrices representing three homo-graphs defined in [GraphConsis](https://arxiv.org/abs/2005.00625) paper;
-- `features`: a sparse matrix of 100-dimension Bag-of-words features;
+- `features`: a sparse matrix of 32-dimension handcrafted features;
 - `label`: a numpy array with the ground truth of nodes. `1` represents spam and `0` represents benign.
 
-To get the complete metadata of the Yelp dataset, please send an email to [ytongdou@gmail.com](mailto:ytongdou@gmail.com) for inquiry.
+The YelpChi data preprocessing details can be found in our [CIKM'20](https://arxiv.org/pdf/2008.08692.pdf) paper.
+To get the complete metadata of the Yelp dataset, please email to [ytongdou@gmail.com](mailto:ytongdou@gmail.com) for inquiry.
 
 ## User Guide
 
@@ -164,4 +165,4 @@ The repository is organized as follows:
 
 
 ## How to Contribute
-You are welcomed to contribute to this open-source toolbox. Currently, you can create PR or send email to [bdscsafegraph@gmail.com](mailto:bdscsafegraph@gmail.com) for inquiry.
+You are welcomed to contribute to this open-source toolbox. Currently, you can create PR or email to [bdscsafegraph@gmail.com](mailto:bdscsafegraph@gmail.com) for inquiry.

@@ -79,10 +79,11 @@ class GraphConvolution(layers.Layer):
 
         self.weights_ = []
         for i in range(1):
-            w = self.add_variable('weight' + str(i), [input_dim, output_dim])
+            w = self.add_weight('weight' + str(i), [input_dim, output_dim],
+                                dtype=tf.float32)
             self.weights_.append(w)
         if self.bias:
-            self.bias = self.add_variable('bias', [output_dim])
+            self.bias = self.add_weight('bias', [output_dim], dtype=tf.float32)
 
     def call(self, inputs: Tuple[tf.Tensor, tf.Tensor],
              training: bool = True) -> tf.Tensor:

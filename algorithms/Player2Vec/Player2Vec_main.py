@@ -92,14 +92,11 @@ if __name__ == "__main__":
     train_mask = tf.convert_to_tensor(sample_mask(idx_train, y.shape[0]))
     val_mask = tf.convert_to_tensor(sample_mask(idx_val, y.shape[0]))
     test_mask = tf.convert_to_tensor(sample_mask(idx_test, y.shape[0]))
-    label = tf.convert_to_tensor(y)
+    label = tf.convert_to_tensor(y, dtype=tf.float32)
 
     # get sparse tuples
     features = preprocess_feature(features)
-    supports = []
-    for i in range(len(adj_list)):
-        hidden = preprocess_adj(adj_list[i])
-        supports.append(hidden)
+    supports = [preprocess_adj(adj) for adj in adj_list]
 
     # initialize the model parameters
     args.input_dim = features[2][1]
@@ -109,10 +106,9 @@ if __name__ == "__main__":
     args.num_features_nonzero = features[1].shape
 
     # get sparse tensors
-    features = tf.SparseTensor(*features)
-    for i in range(len(supports)):
-        supports[i] = [
-            tf.cast(tf.SparseTensor(*supports[i]), dtype=tf.float32)]
+    features = tf.cast(tf.SparseTensor(*features), dtype=tf.float32)
+    supports = [tf.cast(tf.SparseTensor(*support), dtype=tf.float32) for
+                support in supports]
 
     Player2Vec_main(supports, features, label,
                     [train_mask, val_mask, test_mask], args)

@@ -62,13 +62,6 @@ class Player2Vec(keras.Model):
                                              dropout=args.dropout,
                                              norm=False))
 
-        # logistic weights initialization
-        self.x_init = tf.keras.initializers.GlorotUniform()
-        self.u = tf.Variable(
-            initial_value=self.x_init(shape=(self.output_dim, self.class_size),
-                                      dtype=tf.float32),
-            trainable=True)
-
     def call(self, inputs: list, training: bool = True) -> \
             Tuple[tf.Tensor, tf.Tensor]:
         """
@@ -83,7 +76,7 @@ class Player2Vec(keras.Model):
         for i in range(len(supports)):
             output = [x]
             for layer in self.layers:
-                hidden = layer((output[-1], supports[i]), training)
+                hidden = layer((output[-1], [supports[i]]), training)
                 output.append(hidden)
             output = output[-1]
             outputs.append(output)

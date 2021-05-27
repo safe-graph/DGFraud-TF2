@@ -4,7 +4,7 @@ DGFraud (A Deep Graph-based Toolbox for Fraud Detection  in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
 
-from typing import Tuple
+from typing import Tuple, Union
 import scipy.sparse as sp
 import numpy as np
 
@@ -50,7 +50,8 @@ def normalize_adj(adj: np.array) -> sp.coo_matrix:
     return adj.dot(d_mat_inv_sqrt).transpose().dot(d_mat_inv_sqrt).tocoo()
 
 
-def preprocess_adj(adj: np.array) -> Tuple[np.array, np.array, np.array]:
+def preprocess_adj(adj: np.array, to_tuple: bool = True) -> \
+        Union[Tuple[np.array, np.array, np.array], sp.coo_matrix]:
     """
     Preprocessing of adjacency matrix for simple GCN model
     and conversion to tuple representation.
@@ -60,11 +61,15 @@ def preprocess_adj(adj: np.array) -> Tuple[np.array, np.array, np.array]:
     :param adj: the graph adjacency matrix
     """
     adj_normalized = normalize_adj(adj + sp.eye(adj.shape[0]))
-    return sparse_to_tuple(adj_normalized)
+
+    if to_tuple:
+        return sparse_to_tuple(adj_normalized)
+    else:
+        return adj_normalized
 
 
 def preprocess_feature(features: np.array, to_tuple: bool = True) -> \
-        Tuple[np.array, np.array, np.array]:
+        Union[Tuple[np.array, np.array, np.array], sp.csr_matrix]:
     """
     Row-normalize feature matrix and convert to tuple representation
     Parts of this code file were originally forked from

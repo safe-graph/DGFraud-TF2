@@ -98,7 +98,6 @@ def load_data_yelp(path: str = 'dataset/YelpChi.mat',
 def load_example_semi():
     """
     The data loader to load the example data for SemiGNN
-
     """
     # example data for SemiGNN
     features = np.array([[1, 1, 0, 0, 0, 0, 0],
