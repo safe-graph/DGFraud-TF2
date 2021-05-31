@@ -7,6 +7,9 @@ https://github.com/safe-graph/DGFraud-TF2
 Paper: 'Heterogeneous Graph Neural Networks for Malicious Account Detection'
 Link: https://arxiv.org/pdf/2002.12307.pdf
 """
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 import tensorflow as tf
 from tensorflow import keras
