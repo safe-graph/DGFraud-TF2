@@ -4,6 +4,9 @@ Yingtong Dou (@YingtongDou) and UIC BDSC Lab
 DGFraud (A Deep Graph-based Toolbox for Fraud Detection  in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), '../..')))
 
 import argparse
 import numpy as np
