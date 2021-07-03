@@ -180,12 +180,6 @@ masks = [idx_train, idx_val, idx_test]
 
 GEM_main(supports, features, label, masks, args)
 
-print("Testing GAS...")
-exec(open("algorithms/GAS/GAS_main.py").read())
-
-print("Testing SemiGNN...")
-exec(open("algorithms/SemiGNN/SemiGNN_main.py").read())
-
 print("Testing GraphSAGE...")
 # load the data
 adj_list, features, split_ids, y = load_example_data(meta=True, data='yelp')
@@ -247,3 +241,9 @@ for net in adj_list:
 
 GraphConsis_main(neigh_dicts, features, label, [idx_train, idx_val, idx_test],
                  num_classes, args)
+
+print("Testing GAS...")
+exec(open("algorithms/GAS/GAS_main.py").read())
+
+print("Testing SemiGNN...")
+exec(open("algorithms/SemiGNN/SemiGNN_main.py").read())

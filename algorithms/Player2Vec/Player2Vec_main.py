@@ -16,7 +16,6 @@ from algorithms.Player2Vec.Player2Vec import Player2Vec
 from utils.data_loader import load_data_dblp
 from utils.utils import preprocess_adj, preprocess_feature, sample_mask
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # init the common args, expect the model specific args
 parser = argparse.ArgumentParser()
