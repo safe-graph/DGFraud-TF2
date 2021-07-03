@@ -7,13 +7,13 @@
 <p>
 <p align="center">
     <a href="https://travis-ci.com/github/safe-graph/DGFraud-TF2">
-        <img alt="PRs Welcome" src="https://travis-ci.com/safe-graph/DGFraud-TF2.svg?token=wicswr4X2g4v8jddTpUv&branch=main">
+        <img alt="travis-ci" src="https://travis-ci.com/safe-graph/DGFraud-TF2.svg?token=wicswr4X2g4v8jddTpUv&branch=main">
     </a>
     <a href="https://www.tensorflow.org/install">
-        <img alt="GitHub" src="https://img.shields.io/badge/tensorflow-2.X-orange">
+        <img alt="Tensorflow" src="https://img.shields.io/badge/tensorflow-2.X-orange">
     </a>
     <a href="https://www.python.org/">
-        <img alt="GitHub" src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue">
+        <img alt="Python" src="https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-blue">
     </a>
     <a href="https://github.com/safe-graph/DGFraud-TF2/archive/main.zip">
         <img alt="PRs" src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg">

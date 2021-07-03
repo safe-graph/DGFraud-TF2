@@ -5,10 +5,11 @@ DGFraud (A Deep Graph-based Toolbox for Fraud Detection  in TensorFlow 2.X)
 https://github.com/safe-graph/DGFraud-TF2
 """
 
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional, Tuple, Union
 
 import tensorflow as tf
 from tensorflow.keras import layers
+from tensorflow.keras import Sequential
 from tensorflow.keras.initializers import GlorotUniform
 
 
@@ -136,63 +137,87 @@ class AttentionLayer(layers.Layer):
     """ AttentionLayer is a function f : hkey × Hval → hval which maps
     a feature vector hkey and the set of candidates’ feature vectors
     Hval to an weighted sum of elements in Hval.
+
+    :param input_dim: the input dimension
+    :param attention_size: the number of meta_path
+    :param v_type：activation function type
+    :param bias: whether add bias
     """
 
-    def attention(inputs, attention_size, v_type=None, return_weights=False,
-                  bias=True, joint_type='weighted_sum',
-                  multi_view=True):
+    def __init__(self, input_dim: int, attention_size: int,
+                 v_type: str = 'relu', bias: bool = True,
+                 **kwargs: Optional) -> None:
+        super().__init__(**kwargs)
+
+        self.w_omega = tf.Variable(tf.random.uniform([input_dim,
+                                                      attention_size]))
+        self.u_omega = tf.Variable(tf.random.uniform([attention_size]))
+        self.bias = bias
+        if v_type == 'tanh':
+            self.activation = tf.tanh()
+        if v_type == 'relu':
+            self.activation = tf.nn.relu()
+
+        if self.bias:
+            self.b_omega = tf.Variable(tf.random.uniform([attention_size]))
+
+    def call(self, inputs: tf.Tensor, return_weights: bool = False,
+             joint_type: str = 'weighted_sum', multi_view: bool = True) -> \
+            Union[tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]:
         """
         Obtain attention value between different meta_path
 
         :param inputs: the information passed to next layers
-        :param attention_size: the number of meta_path
-        :param v_type：activate function
+
         :param return_weights: the output whether return weights
-        :param bias: whether add bias
         :param joint_type: the way of calculating output
         :param multi_view: whether it's a multiple view
         """
         if multi_view:
             inputs = tf.expand_dims(inputs, 0)
-        hidden_size = inputs.shape[-1]
 
-        # Trainable parameters
-        w_omega = tf.Variable(tf.random.uniform([hidden_size, attention_size]))
-        b_omega = tf.Variable(tf.random.uniform([attention_size]))
-        u_omega = tf.Variable(tf.random.uniform([attention_size]))
-
-        v = tf.tensordot(inputs, w_omega, axes=1)
-        if bias is True:
-            v += b_omega
-        if v_type == 'tanh':
-            v = tf.tanh(v)
-        if v_type == 'relu':
-            v = tf.nn.relu(v)
-        vu = tf.tensordot(v, u_omega, axes=1, name='vu')
-        weights = tf.nn.softmax(vu, name='alphas')
+        v = tf.tensordot(inputs, self.w_omega, axes=1)
+        if self.bias is True:
+            v += self.b_omega
+        v = self.activation(v)
+        vu = tf.tensordot(v, self.u_omega, axes=1, name='vu')
+        alpha = tf.nn.softmax(vu)
 
         if joint_type == 'weighted_sum':
-            output = tf.reduce_sum(inputs * tf.expand_dims(weights, -1), 1)
+            output = tf.reduce_sum(inputs * tf.expand_dims(alpha, -1), 1)
         if joint_type == 'concatenation':
-            output = tf.concat(inputs * tf.expand_dims(weights, -1), 2)
+            output = tf.concat(inputs * tf.expand_dims(alpha, -1), 2)
 
         if not return_weights:
             return output
         else:
-            return output, weights
+            return output, alpha
 
-    def node_attention(inputs, adj, return_weights=False):
+
+class NodeAttention(layers.Layer):
+    """ Node level attention for SemiGNN.
+
+    :param input_dim: the input dimension
+    :param view_num: the number of views
+    """
+
+    def __init__(self, input_dim: int,
+                 **kwargs: Optional) -> None:
+        super().__init__(**kwargs)
+
+        self.H_v = tf.Variable(tf.random.normal([input_dim, 1], stddev=0.1))
+
+    def call(self, inputs: list, return_weights: bool = False) -> \
+            Union[tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]:
         """
         Obtain attention value between nodes
 
         :param inputs: the information passed to next layers
-        :param adj: a list of the sparse adjacency matrices
         :param return_weights: the output whether return weights
         """
-        hidden_size = inputs.shape[-1]
-        H_v = tf.Variable(tf.random.normal([hidden_size, 1], stddev=0.1))
 
         # convert adj to sparse tensor
+        emb, adj = inputs
         zero = tf.constant(0, dtype=tf.float32)
         where = tf.not_equal(adj, zero)
         indices = tf.where(where)
@@ -201,68 +226,101 @@ class AttentionLayer(layers.Layer):
                               values=values,
                               dense_shape=adj.shape)
         v = tf.cast(adj, tf.float32) * tf.squeeze(
-            tf.tensordot(inputs, H_v, axes=1))
+            tf.tensordot(emb, self.H_v, axes=1))
 
-        weights = tf.sparse.softmax(v, name='alphas')  # [nodes,nodes]
-        output = tf.sparse.sparse_dense_matmul(weights, inputs)
+        alpha = tf.sparse.softmax(v)  # [nodes,nodes]
+        output = tf.sparse.sparse_dense_matmul(alpha, emb)
 
         if not return_weights:
             return output
         else:
-            return output, weights
+            return output, alpha
 
-    # view-level attention (equation (4) in SemiGNN)
-    def view_attention(inputs, encoding1, encoding2, layer_size, meta,
-                       return_weights=False):
+
+class ViewAttention(layers.Layer):
+    """ View level attention implementation for SemiGNN
+
+        :param encoding: a list of MLP encoding sizes for each view
+        :param layer_size: the number of view attention layer
+        :param view_num: the number of views
+    """
+
+    def __init__(self, encoding: list, layer_size: int,
+                 view_num: int, **kwargs: Optional) -> None:
+        super().__init__(**kwargs)
+
+        self.encoding = encoding
+        self.view_num = view_num
+        self.layer_size = layer_size
+
+        # Eq. (2) in SemiGNN paper
+        self.dense_layer_ = []
+        for _ in range(view_num):
+            mlp = Sequential()
+            for l in range(layer_size):
+                mlp.add(tf.keras.layers.Dense(encoding[l], activation="relu"))
+            self.dense_layer_.append(mlp)
+
+        self.phi = []
+        for _ in range(view_num):
+            self.phi.append(tf.Variable(tf.random.normal([encoding[-1], 1],
+                                                         stddev=0.1)))
+
+    def call(self, inputs: tf.Tensor, return_weights=False) -> \
+            Union[tf.Tensor, Tuple[tf.Tensor, tf.Tensor]]:
         """
-        Obtain attention value between different view
+        Obtain attention value between different views.
+        Eq. (3) and Eq. (4) in the paper
 
         :param inputs: the information passed to next layers
-        :param encoding1: the first view attention layer unit number
-        :param encoding2：the second view attention layer unit number
-        :param layer_size: the number of view attention layer
-        :param meta: the number of meta_path
         :param return_weights: the output whether return weights
         """
-        h = inputs
-        encoding = [encoding1, encoding2]
-        for j in range(layer_size):
-            v = []
-            for i in range(meta):
-                input = h[i]
-                v_i = tf.keras.layers.Dense(encoding[j])(input)
-                v.append(v_i)
-            h = v
-        h = tf.concat(h, 0)
-        h = tf.reshape(h, [meta, inputs[0].shape[0], encoding2])
-        phi = tf.Variable(tf.random.normal([encoding2, ], stddev=0.1))
-        weights = tf.nn.softmax(h * phi, name='alphas')
-        output = tf.reshape(h * weights,
-                            [1, inputs[0].shape[0] * encoding2 * meta])
+
+        h = []
+        h_phi = []
+        for v in range(self.view_num):
+            h_v = self.dense_layer_[v](inputs[v])
+            h.append(h_v)
+            h_phi.append(tf.matmul(h_v, self.phi[v]))
+
+        h, h_phi = tf.concat(h, 0), tf.concat(h_phi, 0)
+
+        h = tf.reshape(h, [self.view_num, inputs[0].shape[0],
+                           self.encoding[-1]])
+        h_phi = tf.reshape(h_phi, [self.view_num, inputs[0].shape[0]])
+
+        alpha = tf.nn.softmax(h_phi, axis=0)
+        alpha = tf.expand_dims(alpha, axis=2)
+        alpha = tf.repeat(alpha, self.encoding[-1], axis=-1)
+
+        # Eq. (4)
+        output = tf.reshape(alpha * h,
+                            [inputs[0].shape[0],
+                             self.encoding[-1] * self.view_num])
 
         if not return_weights:
             return output
         else:
-            return output, weights
+            return output, alpha
 
-    def scaled_dot_product_attention(q, k, v, mask):
-        """
-        Obtain attention value in one embedding
 
-        :param q: original embedding
-        :param k: original embedding
-        :param v：embedding after aggregate neighbour feature
-        :param mask: whether use mask
-        """
-        qk = tf.matmul(q, k, transpose_b=True)
-        dk = tf.cast(tf.shape(k)[-1], tf.float32)
-        scaled_attention = qk / tf.math.sqrt(dk)
+def scaled_dot_product_attention(q: tf.Tensor, k: tf.Tensor,
+                                 v: tf.Tensor) -> Tuple[tf.Tensor, tf.Tensor]:
+    """
+    Obtain attention value in one embedding
 
-        if mask is not None:
-            scaled_attention += 1
-        weights = tf.nn.softmax(scaled_attention, axis=-1)
-        output = tf.matmul(weights, v)
-        return output, weights
+    :param q: original embedding
+    :param k: original embedding
+    :param v：embedding after aggregate neighbour feature
+    :param mask: whether use mask
+    """
+    qk = tf.matmul(q, k, transpose_b=True)
+    dk = tf.cast(tf.shape(k)[-1], tf.float32)
+    scaled_attention = qk / tf.math.sqrt(dk)
+    scaled_attention += 1
+    weights = tf.nn.softmax(scaled_attention, axis=-1)
+    output = tf.matmul(weights, v)
+    return output, weights
 
 
 class ConcatenationAggregator(layers.Layer):
@@ -474,14 +532,12 @@ class AttentionAggregator(layers.Layer):
                                        [s2[0], s2[1] * s2[2]])
 
         # attention
-        concate_user_vecs, _ = AttentionLayer.scaled_dot_product_attention(
+        concate_user_vecs, _ = scaled_dot_product_attention(
             q=user_vecs, k=user_vecs,
-            v=concate_user_vecs,
-            mask=None)
-        concate_item_vecs, _ = AttentionLayer.scaled_dot_product_attention(
+            v=concate_user_vecs)
+        concate_item_vecs, _ = scaled_dot_product_attention(
             q=item_vecs, k=item_vecs,
-            v=concate_item_vecs,
-            mask=None)
+            v=concate_item_vecs)
 
         # [nodes] x [out_dim]
         user_output = dot(concate_user_vecs, self.user_weights, sparse=False)

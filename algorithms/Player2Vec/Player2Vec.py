@@ -62,6 +62,8 @@ class Player2Vec(keras.Model):
                                              dropout=args.dropout,
                                              norm=False))
 
+
+
     def call(self, inputs: list, training: bool = True) -> \
             Tuple[tf.Tensor, tf.Tensor]:
         """
