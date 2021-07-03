@@ -139,24 +139,21 @@ class AttentionLayer(layers.Layer):
     Hval to an weighted sum of elements in Hval.
 
     :param input_dim: the input dimension
-    :param attention_size: the number of meta_path
+    :param attention_size: the number of meta_paths
     :param v_type：activation function type
     :param bias: whether add bias
     """
 
-    def __init__(self, input_dim: int, attention_size: int,
+    def __init__(self, input_dim: int, num_nodes: int, attention_size: int,
                  v_type: str = 'relu', bias: bool = True,
                  **kwargs: Optional) -> None:
         super().__init__(**kwargs)
 
-        self.w_omega = tf.Variable(tf.random.uniform([input_dim,
+        self.w_omega = tf.Variable(tf.random.uniform([num_nodes * input_dim,
                                                       attention_size]))
         self.u_omega = tf.Variable(tf.random.uniform([attention_size]))
         self.bias = bias
-        if v_type == 'tanh':
-            self.activation = tf.tanh()
-        if v_type == 'relu':
-            self.activation = tf.nn.relu()
+        self.activation = v_type
 
         if self.bias:
             self.b_omega = tf.Variable(tf.random.uniform([attention_size]))
@@ -168,7 +165,6 @@ class AttentionLayer(layers.Layer):
         Obtain attention value between different meta_path
 
         :param inputs: the information passed to next layers
-
         :param return_weights: the output whether return weights
         :param joint_type: the way of calculating output
         :param multi_view: whether it's a multiple view
@@ -177,9 +173,12 @@ class AttentionLayer(layers.Layer):
             inputs = tf.expand_dims(inputs, 0)
 
         v = tf.tensordot(inputs, self.w_omega, axes=1)
-        if self.bias is True:
+        if self.bias:
             v += self.b_omega
-        v = self.activation(v)
+        if self.activation == 'tanh':
+            v = tf.tanh(v)
+        if self.activation == 'relu':
+            v = tf.nn.relu(v)
         vu = tf.tensordot(v, self.u_omega, axes=1, name='vu')
         alpha = tf.nn.softmax(vu)
 
@@ -254,12 +253,12 @@ class ViewAttention(layers.Layer):
         self.layer_size = layer_size
 
         # Eq. (2) in SemiGNN paper
-        self.dense_layer_ = []
+        self.dense_layers = []
         for _ in range(view_num):
             mlp = Sequential()
             for l in range(layer_size):
                 mlp.add(tf.keras.layers.Dense(encoding[l], activation="relu"))
-            self.dense_layer_.append(mlp)
+            self.dense_layers.append(mlp)
 
         self.phi = []
         for _ in range(view_num):
@@ -279,7 +278,7 @@ class ViewAttention(layers.Layer):
         h = []
         h_phi = []
         for v in range(self.view_num):
-            h_v = self.dense_layer_[v](inputs[v])
+            h_v = self.dense_layers[v](inputs[v])
             h.append(h_v)
             h_phi.append(tf.matmul(h_v, self.phi[v]))
 

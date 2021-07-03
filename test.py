@@ -143,6 +143,7 @@ print("Testing Player2Vec...")
 args.nodes = features.shape[0]
 
 supports = [preprocess_adj(adj) for adj in adj_list]
+args.num_meta = len(supports)
 args.class_size = y.shape[1]
 
 # get sparse tensors

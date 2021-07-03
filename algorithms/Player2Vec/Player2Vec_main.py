@@ -99,6 +99,7 @@ if __name__ == "__main__":
     supports = [preprocess_adj(adj) for adj in adj_list]
 
     # initialize the model parameters
+    args.num_meta = len(supports)
     args.input_dim = features[2][1]
     args.output_dim = y.shape[1]
     args.train_size = len(idx_train)

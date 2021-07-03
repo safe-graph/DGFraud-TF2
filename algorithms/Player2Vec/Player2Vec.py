@@ -41,11 +41,12 @@ class Player2Vec(keras.Model):
         self.class_size = args.class_size
         self.train_size = args.train_size
         self.output_dim = output_dim
+        self.num_meta = args.num_meta
         self.weight_decay = args.weight_decay
         self.num_features_nonzero = args.num_features_nonzero
 
-        self.layers_ = []
-        self.layers_.append(GraphConvolution(input_dim=self.input_dim,
+        self.GCN_layers = []
+        self.GCN_layers.append(GraphConvolution(input_dim=self.input_dim,
                                              output_dim=self.nhid,
                                              num_features_nonzero=self.
                                              num_features_nonzero,
@@ -54,7 +55,7 @@ class Player2Vec(keras.Model):
                                              is_sparse_inputs=True,
                                              norm=True))
 
-        self.layers_.append(GraphConvolution(input_dim=self.nhid,
+        self.GCN_layers.append(GraphConvolution(input_dim=self.nhid,
                                              output_dim=self.output_dim,
                                              num_features_nonzero=self.
                                              num_features_nonzero,
@@ -62,6 +63,10 @@ class Player2Vec(keras.Model):
                                              dropout=args.dropout,
                                              norm=False))
 
+        self.att_layer = AttentionLayer(input_dim=output_dim,
+                                        num_nodes=self.nodes,
+                                        attention_size=self.num_meta,
+                                        v_type='tanh')
 
 
     def call(self, inputs: list, training: bool = True) -> \
@@ -77,21 +82,23 @@ class Player2Vec(keras.Model):
         # forward propagation
         for i in range(len(supports)):
             output = [x]
-            for layer in self.layers:
+            for layer in self.GCN_layers:
                 hidden = layer((output[-1], [supports[i]]), training)
                 output.append(hidden)
             output = output[-1]
             outputs.append(output)
         outputs = tf.reshape(outputs,
                              [len(supports), self.nodes * self.output_dim])
-        outputs = AttentionLayer.attention(inputs=outputs,
-                                           attention_size=len(supports),
-                                           v_type='tanh')
+
+        outputs = self.att_layer(inputs=outputs)
         outputs = tf.reshape(outputs, [self.nodes, self.output_dim])
 
         # Weight decay loss
         loss = tf.zeros([])
-        for var in self.layers_[0].trainable_variables:
+        for layer in self.GCN_layers:
+            for var in layer.trainable_variables:
+                loss += self.weight_decay * tf.nn.l2_loss(var)
+        for var in self.att_layer.trainable_variables:
             loss += self.weight_decay * tf.nn.l2_loss(var)
 
         # Cross entropy loss

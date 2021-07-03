@@ -64,7 +64,8 @@ def SemiGNN_main(adj_list: list,
     optimizer = optimizers.Adam(lr=args.lr)
     adj_nodelists = [matrix_to_adjlist(adj, pad=False) for adj in
                      adj_list]
-    pairs = [random_walks(adj_nodelists[i], 2, 3) for i in range(args.view_num)]
+    pairs = [random_walks(adj_nodelists[i], 2, 3)
+             for i in range(args.view_num)]
     adj_data = [pairs_to_matrix(p, args.nodes) for p in pairs]
     u_i = []
     u_j = []
