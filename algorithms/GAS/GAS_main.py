@@ -109,9 +109,9 @@ if __name__ == "__main__":
     args.input_dim_r_gcn = r_feature[2][1]
     args.num_features_nonzero = r_feature[1].shape
     args.h_u_size = adj_list[0].shape[1] * (
-            args.input_dim_r + args.input_dim_u)
-    args.h_i_size = adj_list[2].shape[1] * (
             args.input_dim_r + args.input_dim_i)
+    args.h_i_size = adj_list[2].shape[1] * (
+            args.input_dim_r + args.input_dim_u)
 
     # get sparse tensors
     r_feature = tf.SparseTensor(*r_feature)

@@ -74,8 +74,8 @@ class GAS(keras.Model):
         self.x_init = tf.keras.initializers.GlorotUniform()
         self.u = tf.Variable(initial_value=self.x_init(
             shape=(
-                self.output_dim1 + 2 * self.output_dim2 + 2 * self.reviews_num
-                + self.output_dim5,
+                self.output_dim1 + 2 * self.output_dim2 + self.input_dim_i
+                + self.input_dim_u + self.output_dim5,
                 self.class_size),
             dtype=tf.float32), trainable=True)
 
