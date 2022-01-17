@@ -45,6 +45,8 @@ class GAS(keras.Model):
         self.gcn_dim = args.gcn_dim
         self.h_i_size = args.h_i_size
         self.h_u_size = args.h_u_size
+        self.input_dim_u_x = args.input_dim_u_x
+        self.input_dim_i_x = args.input_dim_i_x
 
         # GAS layers initialization
         self.r_agg_layer = ConcatenationAggregator(
@@ -56,6 +58,8 @@ class GAS(keras.Model):
                                                 input_dim2=self.h_i_size,
                                                 output_dim=self.output_dim3,
                                                 hid_dim=self.output_dim2,
+                                                input_dim_u_x=self.input_dim_u_x,
+                                                input_dim_i_x=self.input_dim_i_x,
                                                 concat=True)
 
         # review aggregator

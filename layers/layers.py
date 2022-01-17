@@ -452,6 +452,7 @@ class AttentionAggregator(layers.Layer):
     """
 
     def __init__(self, input_dim1, input_dim2, output_dim, hid_dim,
+                 input_dim_u_x, input_dim_i_x,
                  dropout=0., bias=False, act=tf.nn.relu,
                  concat=False, **kwargs):
         """
@@ -474,10 +475,10 @@ class AttentionAggregator(layers.Layer):
                                             [input_dim2, hid_dim],
                                             dtype=tf.float32)
         self.concate_user_weights = self.add_weight('concate_user_weights',
-                                                    [hid_dim, output_dim],
+                                                    [input_dim_u_x, input_dim_u_x],
                                                     dtype=tf.float32)
         self.concate_item_weights = self.add_weight('concate_item_weights',
-                                                    [hid_dim, output_dim],
+                                                    [input_dim_i_x, input_dim_i_x],
                                                     dtype=tf.float32)
 
         if self.bias:
