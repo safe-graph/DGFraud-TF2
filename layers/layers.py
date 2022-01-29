@@ -451,7 +451,7 @@ class AttentionAggregator(layers.Layer):
     paper 'Spam Review Detection with Graph Convolutional Networks.'
     """
 
-    def __init__(self, input_dim1, input_dim2, output_dim, hid_dim,
+    def __init__(self, input_dim1, input_dim2, output_dim,
                  dropout=0., bias=False, act=tf.nn.relu,
                  concat=False, **kwargs):
         """
@@ -467,18 +467,18 @@ class AttentionAggregator(layers.Layer):
         self.act = act
         self.concat = concat
 
-        self.user_weights = self.add_weight('user_weights',
-                                            [input_dim1, hid_dim],
-                                            dtype=tf.float32)
-        self.item_weights = self.add_weight('item_weights',
-                                            [input_dim2, hid_dim],
-                                            dtype=tf.float32)
-        self.concate_user_weights = self.add_weight('concate_user_weights',
-                                                    [hid_dim, output_dim],
-                                                    dtype=tf.float32)
-        self.concate_item_weights = self.add_weight('concate_item_weights',
-                                                    [hid_dim, output_dim],
-                                                    dtype=tf.float32)
+        self.user_neigh_weights = self.add_weight('user_neigh_weights',
+                                                  [input_dim1, output_dim],
+                                                  dtype=tf.float32)
+        self.item_neigh_weights = self.add_weight('item_neigh_weights',
+                                                  [input_dim2, output_dim],
+                                                  dtype=tf.float32)
+        self.center_user_weights = self.add_weight('center_user_weights',
+                                                   [input_dim1, output_dim],
+                                                   dtype=tf.float32)
+        self.center_item_weights = self.add_weight('center_item_weights',
+                                                   [input_dim2, output_dim],
+                                                   dtype=tf.float32)
 
         if self.bias:
             self.user_bias = self.add_weight('user_bias', [self.output_dim],
@@ -539,8 +539,8 @@ class AttentionAggregator(layers.Layer):
             v=concate_item_vecs)
 
         # [nodes] x [out_dim]
-        user_output = dot(concate_user_vecs, self.user_weights, sparse=False)
-        item_output = dot(concate_item_vecs, self.item_weights, sparse=False)
+        user_output = dot(concate_user_vecs, self.user_neigh_weights, sparse=False)
+        item_output = dot(concate_item_vecs, self.item_neigh_weights, sparse=False)
 
         # bias
         if self.bias:
@@ -550,12 +550,12 @@ class AttentionAggregator(layers.Layer):
         user_output = self.act(user_output)
         item_output = self.act(item_output)
 
-        #  Combination
+        #  Combination Eq. (8) in the paper
         if self.concat:
-            user_output = dot(user_output, self.concate_user_weights,
-                              sparse=False)
-            item_output = dot(item_output, self.concate_item_weights,
-                              sparse=False)
+            user_vecs = dot(user_vecs, self.center_user_weights,
+                            sparse=False)
+            item_vecs = dot(item_vecs, self.center_item_weights,
+                            sparse=False)
 
             user_output = tf.concat([user_vecs, user_output], axis=1)
             item_output = tf.concat([item_vecs, item_output], axis=1)

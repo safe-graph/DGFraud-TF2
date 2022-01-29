@@ -39,8 +39,6 @@ class GAS(keras.Model):
         self.output_dim1 = args.output_dim1
         self.output_dim2 = args.output_dim2
         self.output_dim3 = args.output_dim3
-        self.output_dim4 = args.output_dim4
-        self.output_dim5 = args.output_dim5
         self.num_features_nonzero = args.num_features_nonzero
         self.gcn_dim = args.gcn_dim
         self.h_i_size = args.h_i_size
@@ -54,13 +52,12 @@ class GAS(keras.Model):
         # item user aggregator
         self.iu_agg_layer = AttentionAggregator(input_dim1=self.h_u_size,
                                                 input_dim2=self.h_i_size,
-                                                output_dim=self.output_dim3,
-                                                hid_dim=self.output_dim2,
+                                                output_dim=self.output_dim2,
                                                 concat=True)
 
         # review aggregator
         self.r_gcn_layer = GraphConvolution(input_dim=self.input_dim_r_gcn,
-                                            output_dim=self.output_dim5,
+                                            output_dim=self.output_dim3,
                                             num_features_nonzero=self.
                                             num_features_nonzero,
                                             activation=tf.nn.relu,
@@ -75,7 +72,7 @@ class GAS(keras.Model):
         self.u = tf.Variable(initial_value=self.x_init(
             shape=(
                 self.output_dim1 + 2 * self.output_dim2 + self.input_dim_i
-                + self.input_dim_u + self.output_dim5,
+                + self.input_dim_u + self.output_dim3,
                 self.class_size),
             dtype=tf.float32), trainable=True)
 

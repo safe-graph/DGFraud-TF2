@@ -35,8 +35,6 @@ parser.add_argument('--gcn_dim', type=int, default=5, help='gcn layer size.')
 parser.add_argument('--output_dim1', type=int, default=64)
 parser.add_argument('--output_dim2', type=int, default=64)
 parser.add_argument('--output_dim3', type=int, default=64)
-parser.add_argument('--output_dim4', type=int, default=64)
-parser.add_argument('--output_dim5', type=int, default=64)
 parser.add_argument('--dropout', type=float, default=0.5, help='dropout rate')
 
 args = parser.parse_args()
