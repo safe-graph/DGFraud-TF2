@@ -451,8 +451,8 @@ class AttentionAggregator(layers.Layer):
     paper 'Spam Review Detection with Graph Convolutional Networks.'
     """
 
-    def __init__(self, input_dim1, input_dim2, output_dim,
-                 dropout=0., bias=False, act=tf.nn.relu,
+    def __init__(self, input_dim1, input_dim2, input_dim3, input_dim4,
+                 output_dim, dropout=0., bias=False, act=tf.nn.relu,
                  concat=False, **kwargs):
         """
         :param input_dim1: input dimension in user layer
@@ -474,10 +474,10 @@ class AttentionAggregator(layers.Layer):
                                                   [input_dim2, output_dim],
                                                   dtype=tf.float32)
         self.center_user_weights = self.add_weight('center_user_weights',
-                                                   [input_dim1, output_dim],
+                                                   [input_dim3, output_dim],
                                                    dtype=tf.float32)
         self.center_item_weights = self.add_weight('center_item_weights',
-                                                   [input_dim2, output_dim],
+                                                   [input_dim4, output_dim],
                                                    dtype=tf.float32)
 
         if self.bias:

@@ -52,6 +52,8 @@ class GAS(keras.Model):
         # item user aggregator
         self.iu_agg_layer = AttentionAggregator(input_dim1=self.h_u_size,
                                                 input_dim2=self.h_i_size,
+                                                input_dim3=self.input_dim_u,
+                                                input_dim4=self.input_dim_i,
                                                 output_dim=self.output_dim2,
                                                 concat=True)
 
@@ -71,8 +73,7 @@ class GAS(keras.Model):
         self.x_init = tf.keras.initializers.GlorotUniform()
         self.u = tf.Variable(initial_value=self.x_init(
             shape=(
-                self.output_dim1 + 2 * self.output_dim2 + self.input_dim_i
-                + self.input_dim_u + self.output_dim3,
+                self.output_dim1 + 4 * self.output_dim2 + self.output_dim3,
                 self.class_size),
             dtype=tf.float32), trainable=True)
 
