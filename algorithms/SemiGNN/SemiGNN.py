@@ -97,7 +97,7 @@ class SemiGNN(keras.Model):
         masked_label = tf.gather(label, idx_mask)
 
         # calculation loss and accuracy
-        logits = tf.nn.softmax(tf.matmul(masked_data, self.theta))
+        logits = tf.matmul(masked_data, self.theta)
 
         # Eq. (5)
         loss1 = -(1 / len(idx_mask)) * tf.reduce_sum(
